@@ -1,20 +1,22 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-import subprocess
+from pathlib import Path
 from threading import Thread
 
 from maya import OpenMayaUI as omui
 
 from maya_playblast.helpers import launchers
+from maya_playblast.helpers.config import CaptureConfig
 from maya_playblast.helpers.logger import log
-from maya_playblast.ui import editor, utils as uiUtils
+from maya_playblast.ui import editor, uiUtils
 
 
 @contextmanager
-def SetEditorFlag(view: omui.M3DView):
+def SetEditorFlag(view: omui.M3dView):
     name = uiUtils.get_editor_from_view(view)
     if not name:
+        yield
         return
 
     states = editor.VIEWPORT_FLAGS.snapshot(name)
@@ -29,16 +31,13 @@ def UseNewPanel(width: int, height: int):
     widget = uiUtils.create_panel(width, height)
     try:
         yield uiUtils.get_view(widget.panel.objectName())
-    except Exception as e:
-        raise e
     finally:
         uiUtils.delete_panel(widget)
 
 
 @contextmanager
-def ImageToVideo(output_path: str, width: int, height: int, frame_rate: int = 30,
-                 codec: str = "libx264", crf: int = 24):
-    proc = launchers.ffmpeg_capture(width, height, frame_rate, codec, crf, output_path)
+def ImageToVideo(config: CaptureConfig, width: int, height: int):
+    proc = launchers.ffmpeg_capture(config, width, height)
 
     stderr_lines = []
     def drain_stderr():
@@ -58,4 +57,8 @@ def ImageToVideo(output_path: str, width: int, height: int, frame_rate: int = 30
         stderr_thread.join()
         if stderr_lines:
             log.error("ffmpeg stderr:\n" + "\n".join(stderr_lines))
-        proc.wait()
+        try:
+            proc.wait(timeout=30)
+        except Exception as e:
+            proc.kill()
+            raise e
