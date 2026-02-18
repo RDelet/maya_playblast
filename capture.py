@@ -38,15 +38,17 @@ class FrameCapture:
     def run(self):
 
         cfg = self._config
-        
+        width = self.width
+        height = self.height
+
         log.debug(
             f"Starting capture — frames [{cfg.start_frame} → {cfg.end_frame}], "
-            f"size {self.width}x{self.height}, fps {cfg.frame_rate}, codec {cfg.codec}, crf {cfg.crf}"
+            f"size {width}x{height}, fps {cfg.frame_rate}, codec {cfg.codec}, crf {cfg.crf}"
         )
 
         try:
             with context.SetEditorFlag(self._view):
-                with context.ImageToVideo(cfg, self.width, self.height) as proc:
+                with context.ImageToVideo(cfg, width, height) as proc:
                     for i in range(cfg.frame_count):
                         current = cfg.start_frame + i
 
