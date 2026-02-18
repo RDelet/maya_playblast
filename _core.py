@@ -4,7 +4,7 @@ from typing import Optional
 
 from maya_playblast.helpers import launchers
 from maya_playblast.capture import CaptureConfig, FrameCapture
-from maya_playblast.ui import uiUtils
+from maya_playblast.ui import ui_utils
 
 
 def record(output_path: str | Path, codec: str = "libx264", crf: int = 24,
@@ -17,7 +17,7 @@ def record(output_path: str | Path, codec: str = "libx264", crf: int = 24,
                            start_frame=start_frame,
                            end_frame=end_frame)
 
-    capture = FrameCapture(uiUtils.get_active_view(), config)
+    capture = FrameCapture(ui_utils.get_active_view(), config)
     capture.on_capture_complete.register(launchers.open_player)
 
     capture.run()

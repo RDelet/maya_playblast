@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 from dataclasses import dataclass, field
 from typing import Dict, List
 
@@ -37,6 +38,10 @@ class ViewportFlags:
     def set(self, name: str, value: bool):
         flag = self.get(name)
         flag.value = value
+    
+    def copy(self) -> ViewportFlags:
+        new_flags = copy.deepcopy(self.flags)
+        return ViewportFlags(flags=new_flags)
 
     def snapshot(self, panel: str) -> List[ViewportFlag]:
         result = []

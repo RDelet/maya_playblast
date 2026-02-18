@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from maya_playblast.helpers import file, mayaUtils
+from maya_playblast.helpers import file, maya_utils
 
 
 @dataclass
@@ -27,11 +27,11 @@ class CaptureConfig:
             self.output_path = file.increment_file_path(self.output_path)
 
         if self.start_frame is None:
-            self.start_frame = mayaUtils.get_animation_start()
+            self.start_frame = maya_utils.get_animation_start()
         if self.end_frame is None:
-            self.end_frame = mayaUtils.get_animation_end()
+            self.end_frame = maya_utils.get_animation_end()
         if self.frame_rate is None:
-            self.frame_rate = mayaUtils.get_frame_rate()
+            self.frame_rate = maya_utils.get_frame_rate()
 
     @property
     def frame_count(self) -> int:
