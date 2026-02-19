@@ -7,7 +7,7 @@ from threading import Thread
 from maya import OpenMayaUI as omui
 
 from maya_playblast.io import launchers
-from maya_playblast.core.config import CaptureConfig, ViewConfig
+from maya_playblast.capture.config import CaptureConfig, ViewConfig
 from maya_playblast.core.logger import log
 from maya_playblast.maya import maya_ui, viewport
 

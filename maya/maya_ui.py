@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance, getCppPointer
 
@@ -46,7 +44,7 @@ def get_widget(ptr, custom_widget: QtWidgets.QWidget = QtWidgets.QWidget) -> QtW
     return wrapInstance(int(ptr), custom_widget)
 
 
-def find_control(name: str) -> Optional[QtWidgets.QWidget]:
+def find_control(name: str) -> QtWidgets.QWidget | None:
     ptr = omui.MQtUtil.findControl(name)
     return get_widget(ptr) if ptr else None
 
@@ -60,12 +58,12 @@ def get_active_view() -> omui.M3dView:
     return omui.M3dView.active3dView()
 
 
-def get_active_editor() -> Optional[str]:
+def get_active_editor() -> str | None:
     active_view = omui.M3dView.active3dView()
     return get_editor_from_view(active_view)
 
 
-def get_editor_from_view(view: omui.M3dView) -> Optional[str]:
+def get_editor_from_view(view: omui.M3dView) -> str | None:
     # Get panel pointers
     panel_ptrs = {}
     for panel in cmds.getPanel(type="modelPanel"):

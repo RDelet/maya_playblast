@@ -29,7 +29,13 @@ class ViewportFlags:
     
     def __post_init__(self):
         self._index = {f.name: f for f in self.flags}
+
+    def __getitem__(self, name: str) -> ViewportFlag:
+        return self.get(name)
     
+    def __setitem__(self, name: str, value: bool):
+        self.set(name, value)
+
     def get(self, name: str) -> ViewportFlag:
         if name not in self._index:
             raise ValueError(f"Viewport flag '{name}' not found")

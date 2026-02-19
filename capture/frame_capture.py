@@ -2,18 +2,17 @@ from __future__ import annotations
 
 import ctypes
 import numpy as np
-from typing import Optional
 
 from maya_playblast.capture import context
 from maya_playblast.core import signal
 from maya_playblast.maya import maya_utils
-from maya_playblast.core.config import CaptureConfig, ViewConfig
+from maya_playblast.capture.config import CaptureConfig, ViewConfig
 from maya_playblast.core.logger import log
 
 
 class FrameCapture:
 
-    def __init__(self, capture_config: CaptureConfig, view_config: Optional[ViewConfig] = None):
+    def __init__(self, capture_config: CaptureConfig, view_config: ViewConfig | None = None):
         
         self._view_cfg = view_config if view_config else ViewConfig.from_active()
         self._config_cfg = capture_config

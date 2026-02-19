@@ -3,7 +3,7 @@ from pathlib import Path
 import subprocess
 
 from maya_playblast.core import constants
-from maya_playblast.core.config import CaptureConfig, ViewConfig
+from maya_playblast.capture.config import CaptureConfig, ViewConfig
 from maya_playblast.core.logger import log
 
 

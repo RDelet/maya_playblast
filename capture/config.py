@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 from maya import OpenMayaUI as omui
 
@@ -17,12 +16,12 @@ class CaptureConfig:
     output_path: str | Path
     codec: str = "libx264"
     crf: int = 24
-    start_frame: Optional[int] = None
-    end_frame: Optional[int] = None
-    frame_rate: Optional[int] = None
+    start_frame: int | None = None
+    end_frame: int | None = None
+    frame_rate: int | None = None
     # For custom panel
-    width: Optional[int] = None
-    height: Optional[int] = None
+    width: int | None = None
+    height: int | None = None
 
     def __post_init__(self) -> None:
         if self.crf < 0 or self.crf > 51:
@@ -50,8 +49,8 @@ class CaptureConfig:
 class ViewConfig:
 
     view: omui.M3dView
-    width: Optional[int] = None
-    height: Optional[int] = None
+    width: int | None = None
+    height: int | None = None
     flags: ViewportFlags = field(default_factory=lambda: VIEWPORT_FLAGS.copy())
 
     def __post_init__(self):
