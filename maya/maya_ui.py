@@ -8,7 +8,14 @@ from shiboken2 import wrapInstance, getCppPointer
 from maya import cmds, OpenMayaUI as omui
 
 
-def create_panel(width: int, height: int):
+class PanelWidget(QtWidgets.QWidget):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.panel = None
+
+
+def create_panel(width: int, height: int) -> PanelWidget:
     # Create new Panel
     margin_offset = 4
     new_window = cmds.window(title="Hodor Panel", widthHeight=(width + margin_offset, height + margin_offset))
@@ -17,7 +24,7 @@ def create_panel(width: int, height: int):
                                 menuBarVisible=False,
                                 menuBarRepeatLast=False)
     # hide Icon Bar
-    widget = find_window(new_window)
+    widget = find_window(new_window, PanelWidget)
     widget.panel = widget.findChild(QtWidgets.QWidget, new_panel)
     icon_bar = widget.findChild(QtWidgets.QWidget, "modelEditorIconBar")
     icon_bar.hide()
@@ -35,8 +42,8 @@ def delete_panel(widget: QtWidgets.QWidget):
         cmds.deleteUI(panel_name, panel=True)
 
 
-def get_widget(ptr) -> QtWidgets.QWidget:
-    return wrapInstance(int(ptr), QtWidgets.QWidget)
+def get_widget(ptr, custom_widget: QtWidgets.QWidget = QtWidgets.QWidget) -> QtWidgets.QWidget:
+    return wrapInstance(int(ptr), custom_widget)
 
 
 def find_control(name: str) -> Optional[QtWidgets.QWidget]:
@@ -44,9 +51,9 @@ def find_control(name: str) -> Optional[QtWidgets.QWidget]:
     return get_widget(ptr) if ptr else None
 
 
-def find_window(name: str) -> QtWidgets.QWidget:
+def find_window(name: str, custom_widget: QtWidgets.QWidget) -> QtWidgets.QWidget:
     ptr = omui.MQtUtil.findWindow(name)
-    return get_widget(ptr) if ptr else None
+    return get_widget(ptr, custom_widget) if ptr else None
 
 
 def get_active_view() -> omui.M3dView:

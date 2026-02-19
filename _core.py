@@ -2,16 +2,16 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
-from maya_playblast.helpers import file, launchers
-from maya_playblast.helpers.config import CaptureConfig
-from maya_playblast.helpers.capture import FrameCapture
+from maya_playblast.io import io_utils, launchers
+from maya_playblast.core.config import CaptureConfig
+from maya_playblast.capture.frame_capture import FrameCapture
 
 
 def record(output_path: str | Path, codec: str = "libx264", crf: int = 24,
            start_frame: Optional[int] = None, end_frame: Optional[int] = None,
            width: Optional[int] = None, height: Optional[int] = None,):
     
-    file.check_directory(output_path, build=True)
+    io_utils.check_directory(output_path, build=True)
     config = CaptureConfig(output_path=output_path,
                            codec=codec,
                            crf=crf,

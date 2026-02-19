@@ -6,9 +6,9 @@ from typing import Optional
 
 from maya import OpenMayaUI as omui
 
-from maya_playblast.helpers import file, maya_utils
-from maya_playblast.helpers.maya_ui import get_active_view
-from maya_playblast.helpers.viewport import ViewportFlags, VIEWPORT_FLAGS
+from maya_playblast.io import io_utils
+from maya_playblast.maya import maya_ui, maya_utils
+from maya_playblast.maya.viewport import ViewportFlags, VIEWPORT_FLAGS
 
 
 @dataclass
@@ -31,7 +31,7 @@ class CaptureConfig:
         if isinstance(self.output_path, str):
             self.output_path = Path(self.output_path)
         if self.output_path.exists():
-            self.output_path = file.increment_file_path(self.output_path)
+            self.output_path = io_utils.increment_file_path(self.output_path)
 
         if self.start_frame is None:
             self.start_frame = maya_utils.get_animation_start()
@@ -62,4 +62,4 @@ class ViewConfig:
 
     @classmethod
     def from_active(cls) -> ViewConfig:
-        return cls(view=get_active_view())
+        return cls(view=maya_ui.get_active_view())

@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from maya import cmds
 
-from maya_playblast.helpers.logger import log
+from maya_playblast.core.logger import log
 
 
 @dataclass
@@ -50,7 +50,7 @@ class ViewportFlags:
                 current = cmds.modelEditor(panel, query=True, **{flag.name: True})
                 result.append(ViewportFlag(flag.name, current, flag.keep_visible))
             except Exception as e:
-                print(f"Error getting state of {flag.name}", e)
+                log.error(f"Error getting state of {flag.name} !", e)
 
         return result
 
