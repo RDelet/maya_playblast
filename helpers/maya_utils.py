@@ -1,6 +1,13 @@
 from maya import cmds, OpenMaya as om
 
 
+def create_image() -> om.MImage:
+    return om.MImage()
+
+def current_time(current) -> int:
+    return cmds.currentTime(current)
+
+
 def get_animation_end() -> int:
     return int(cmds.playbackOptions(query=True, animationEndTime=True))
 

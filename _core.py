@@ -2,24 +2,26 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
-from maya_playblast.helpers import launchers
-from maya_playblast.capture import CaptureConfig, FrameCapture
-from maya_playblast.ui import ui_utils
+from maya_playblast.helpers import file, launchers
+from maya_playblast.helpers.config import CaptureConfig
+from maya_playblast.helpers.capture import FrameCapture
 
 
 def record(output_path: str | Path, codec: str = "libx264", crf: int = 24,
-           start_frame: Optional[int] = None, end_frame: Optional[int] = None):
-    # ToDo: Give specific resolution
+           start_frame: Optional[int] = None, end_frame: Optional[int] = None,
+           width: Optional[int] = None, height: Optional[int] = None,):
     
+    file.check_directory(output_path, build=True)
     config = CaptureConfig(output_path=output_path,
                            codec=codec,
                            crf=crf,
                            start_frame=start_frame,
-                           end_frame=end_frame)
+                           end_frame=end_frame,
+                           width=width,
+                           height=height)
 
-    capture = FrameCapture(ui_utils.get_active_view(), config)
+    capture = FrameCapture(config)
     capture.on_capture_complete.register(launchers.open_player)
-
     capture.run()
 
 

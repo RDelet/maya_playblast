@@ -14,3 +14,18 @@ def increment_file_path(path: str | Path) -> Path:
         i += 1
     
     return path
+
+
+def check_directory(path: str | Path, build: bool = True) -> bool:
+    if isinstance(path, str):
+        path = Path(path)
+    if path.suffix:
+        path = path.parent
+
+    if not path.exists():
+        if build:
+            path.mkdir()
+        else:
+            return False
+    
+    return path.exists()

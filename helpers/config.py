@@ -4,7 +4,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+from maya import OpenMayaUI as omui
+
 from maya_playblast.helpers import file, maya_utils
+from maya_playblast.helpers.maya_ui import get_active_view
+from maya_playblast.helpers.viewport import ViewportFlags, VIEWPORT_FLAGS
 
 
 @dataclass
@@ -16,6 +20,9 @@ class CaptureConfig:
     start_frame: Optional[int] = None
     end_frame: Optional[int] = None
     frame_rate: Optional[int] = None
+    # For custom panel
+    width: Optional[int] = None
+    height: Optional[int] = None
 
     def __post_init__(self) -> None:
         if self.crf < 0 or self.crf > 51:
@@ -36,3 +43,23 @@ class CaptureConfig:
     @property
     def frame_count(self) -> int:
         return self.end_frame - self.start_frame + 1
+
+
+
+@dataclass
+class ViewConfig:
+
+    view: omui.M3dView
+    width: Optional[int] = None
+    height: Optional[int] = None
+    flags: ViewportFlags = field(default_factory=lambda: VIEWPORT_FLAGS.copy())
+
+    def __post_init__(self):
+        if self.width is None:
+            self.width = self.view.portWidth()
+        if self.height is None:
+            self.height = self.view.portHeight()
+
+    @classmethod
+    def from_active(cls) -> ViewConfig:
+        return cls(view=get_active_view())

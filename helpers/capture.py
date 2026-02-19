@@ -2,44 +2,36 @@ from __future__ import annotations
 
 import ctypes
 import numpy as np
+from typing import Optional
 
-from maya import cmds, OpenMaya as om, OpenMayaUI as omui
-
-from maya_playblast.helpers import context, signal
-from maya_playblast.helpers.config import CaptureConfig
+from maya_playblast.helpers import context, maya_utils, signal
+from maya_playblast.helpers.config import CaptureConfig, ViewConfig
 from maya_playblast.helpers.logger import log
 
 
 class FrameCapture:
 
-    def __init__(self, view: omui.M3dView, config: CaptureConfig) -> None:
-        self._view = view
-        self._config = config
+    def __init__(self, capture_config: CaptureConfig, view_config: Optional[ViewConfig] = None):
+        
+        self._view_cfg = view_config if view_config else ViewConfig.from_active()
+        self._config_cfg = capture_config
         self.on_capture_complete = signal.Signal()
         self.on_progress = signal.Signal()
 
-    @property
-    def width(self) -> int:
-        return self._view.portWidth()
-
-    @property
-    def height(self) -> int:
-        return self._view.portHeight()
-
     def capture_frame(self) -> np.ndarray:
-        img = om.MImage()
-        self._view.readColorBuffer(img, True)
+        img = maya_utils.create_image()
+        self._view_cfg.view.readColorBuffer(img, True)
 
-        buffer_bytes = ctypes.string_at(int(img.pixels()), self.width * self.height * 4)
-        pixel_array = np.frombuffer(buffer_bytes, dtype=np.uint8).reshape((self.height, self.width, 4))
+        buffer_bytes = ctypes.string_at(int(img.pixels()), self._view_cfg.width * self._view_cfg.height * 4)
+        pixel_array = np.frombuffer(buffer_bytes, dtype=np.uint8).reshape((self._view_cfg.height, self._view_cfg.width, 4))
 
         return np.ascontiguousarray(pixel_array[::-1])
 
     def run(self):
 
-        cfg = self._config
-        width = self.width
-        height = self.height
+        cfg = self._config_cfg
+        width = self._view_cfg.width
+        height = self._view_cfg.height
 
         log.debug(
             f"Starting capture — frames [{cfg.start_frame} → {cfg.end_frame}], "
@@ -47,8 +39,8 @@ class FrameCapture:
         )
 
         try:
-            with context.SetEditorFlag(self._view):
-                with context.ImageToVideo(cfg, width, height) as proc:
+            with context.SetEditorFlag(self._view_cfg.view):
+                with context.ImageToVideo(cfg, self._view_cfg) as proc:
                     for i in range(cfg.frame_count):
                         current = cfg.start_frame + i
 
@@ -57,7 +49,7 @@ class FrameCapture:
                             break
 
                         try:
-                            cmds.currentTime(current)
+                            maya_utils.current_time(current)
                             raw = self.capture_frame().tobytes()
                             proc.stdin.write(raw)
                             self.on_progress.emit()

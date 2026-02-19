@@ -7,37 +7,38 @@ from threading import Thread
 from maya import OpenMayaUI as omui
 
 from maya_playblast.helpers import launchers
-from maya_playblast.helpers.config import CaptureConfig
+from maya_playblast.helpers.config import CaptureConfig, ViewConfig
 from maya_playblast.helpers.logger import log
-from maya_playblast.ui import editor, ui_utils
+from maya_playblast.helpers import viewport, maya_ui
 
 
 @contextmanager
 def SetEditorFlag(view: omui.M3dView):
-    name = ui_utils.get_editor_from_view(view)
+    name = maya_ui.get_editor_from_view(view)
     if not name:
+        log.warning("Impossible to get editor from view.")
         yield
         return
 
-    states = editor.VIEWPORT_FLAGS.snapshot(name)
+    states = viewport.VIEWPORT_FLAGS.snapshot(name)
     try:
-        yield editor.disable_viewport_state(name)
+        yield viewport.disable_viewport_state(name)
     finally:
-        editor.set_viewport_state(name, states)
+        viewport.set_viewport_state(name, states)
 
 
 @contextmanager
 def UseNewPanel(width: int, height: int):
-    widget = ui_utils.create_panel(width, height)
+    widget = maya_ui.create_panel(width, height)
     try:
-        yield ui_utils.get_view(widget.panel.objectName())
+        yield maya_ui.get_view(widget.panel.objectName())
     finally:
-        ui_utils.delete_panel(widget)
+        maya_ui.delete_panel(widget)
 
 
 @contextmanager
-def ImageToVideo(config: CaptureConfig, width: int, height: int):
-    proc = launchers.ffmpeg_capture(config, width, height)
+def ImageToVideo(config_cfg: CaptureConfig, view_cfg: ViewConfig):
+    proc = launchers.ffmpeg_capture(config_cfg, view_cfg)
 
     stderr_lines = []
     def drain_stderr():

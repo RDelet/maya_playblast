@@ -3,7 +3,7 @@ from pathlib import Path
 import subprocess
 
 from maya_playblast.helpers import constants
-from maya_playblast.helpers.config import CaptureConfig
+from maya_playblast.helpers.config import CaptureConfig, ViewConfig
 from maya_playblast.helpers.logger import log
 
 
@@ -11,7 +11,7 @@ def open_player(path: str | Path):
     if isinstance(path, str):
         path = Path(path)
     if not path.exists():
-        raise RuntimeError(f"Path {path.as_posix()} does not exists !")
+        raise RuntimeError(f"Path {path} does not exists !")
 
     try:
         log.warning(f"Open file {path} with {constants.PLAYER_PATH}")
@@ -19,16 +19,16 @@ def open_player(path: str | Path):
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                 creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP)
     except Exception as e:
-        raise RuntimeError(f"Impossible to read {path.as_posix()}")
+        raise RuntimeError(f"Failed  to read {path} !\n\t{e}") from e
 
 
-def ffmpeg_capture(config: CaptureConfig, width: int, height: int):
+def ffmpeg_capture(config: CaptureConfig, view_cfg: ViewConfig):
     proc_cmd = [str(constants.FFMPEG_PATH),
                 '-y',
                 '-f', 'rawvideo',
                 '-vcodec', 'rawvideo',
                 '-pix_fmt', 'rgba',
-                '-s', f'{width}x{height}',
+                '-s', f'{view_cfg.width}x{view_cfg.height}',
                 '-framerate', f'{config.frame_rate}',
                 '-i', '-',
                 '-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2',
