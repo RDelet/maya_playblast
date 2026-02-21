@@ -40,6 +40,9 @@ def delete_panel(widget: QtWidgets.QWidget):
         cmds.deleteUI(panel_name, panel=True)
 
 
+def get_main_window() -> QtWidgets.QWidget:
+    return get_widget(omui.MQtUtil.mainWindow())
+
 def get_widget(ptr, custom_widget: QtWidgets.QWidget = QtWidgets.QWidget) -> QtWidgets.QWidget:
     return wrapInstance(int(ptr), custom_widget)
 
