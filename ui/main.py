@@ -184,10 +184,6 @@ class PlayblastDialog(QtWidgets.QDialog):
         return VIDEO_ENCODERS[self._encoders.current_index][0]
     
     @property
-    def crf(self) -> int:
-        return 24
-    
-    @property
     def start_frame(self) -> int:
         return maya_utils.get_animation_start()
     
@@ -221,25 +217,6 @@ class PlayblastDialog(QtWidgets.QDialog):
         if self._settings.player_path:
             capture.on_capture_complete.register(launchers.open_player)
         capture.run()
-
-    def _apply_flags_to_config(self):
-        flags = self._viewport_widget.flag_widgets
-        for name, chk in flags.items():
-            try:
-                VIEWPORT_FLAGS[name] = chk.isChecked()
-            except Exception:
-                pass
-
-    def _set_all_flags(self, value: bool):
-        flags = self._viewport_widget.flag_widgets
-        for chk in flags.values():
-            chk.setChecked(value)
-    
-    def _reset_flags(self):
-        flags = self._viewport_widget.flag_widgets
-        for flag in VIEWPORT_FLAGS:
-            if flag.name in flags:
-                flags[flag.name].setChecked(flag.keep_visible)
     
     def _save_settings(self):
         self._settings.output_path = self.output_path

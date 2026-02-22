@@ -67,7 +67,7 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
         self.setStyleSheet(self.STYLE)
 
     def _build_checkboxes(self, viewport_flags: dict[str, bool] | None = None, columns: int = 3):
-        grid_layout = QtWidgets.QGridLayout(self)
+        grid_layout = QtWidgets.QGridLayout()
         grid_layout.setSpacing(2)
         grid_layout.setContentsMargins(0, 0, 0, 0)
         self._layout.addLayout(grid_layout)

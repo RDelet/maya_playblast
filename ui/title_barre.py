@@ -31,6 +31,7 @@ class TitleBarre(QtWidgets.QWidget):
         self.setStyleSheet(self.STYLE)
     
     def _update_margins(self, widget: QtWidgets.QWidget):
+        widget.ensurePolished()
         self._right_width += widget.width()
         self._layout.setContentsMargins(self._right_width, 0, 0, 0)
         

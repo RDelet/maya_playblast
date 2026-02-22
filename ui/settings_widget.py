@@ -86,7 +86,9 @@ class SettingsWidget(QtWidgets.QWidget):
     
     def _on_ffmpeg_selected(self, path: Path):
         self._settings.ffmpeg_path = path
+        self._settings.save()
     
     def _on_player_selected(self, path: Path):
         self._settings.player_path = path
+        self._settings.save()
  

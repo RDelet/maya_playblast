@@ -75,7 +75,7 @@ class SaveFileWidget(QtWidgets.QWidget):
 
     @property
     def extension(self) -> str:
-        return self.extension
+        return self._extension
 
     @extension.setter
     def extension(self, ext: str):
