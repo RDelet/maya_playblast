@@ -6,10 +6,10 @@ except:
     from PySide6 import QtCore, QtWidgets
 
 
-class TitleBarre(QtWidgets.QWidget):
+class WindowHeader(QtWidgets.QWidget):
 
     STYLE = """
-        TitleBarre QLabel {
+        WindowHeader QLabel {
             color: #e0a020;
             font-size: 13px;
             font-weight: bold;
@@ -26,12 +26,15 @@ class TitleBarre(QtWidgets.QWidget):
         self._layout.setContentsMargins(0, 0, 0, 0)
         self._layout.setSpacing(0)
 
-        title_label = QtWidgets.QLabel(title, self)
-        title_label.setFixedHeight(30)
-        title_label.setAlignment(QtCore.Qt.AlignCenter)
-        self._layout.addWidget(title_label)
+        self._title_label = QtWidgets.QLabel(title, self)
+        self._title_label.setFixedHeight(30)
+        self._title_label.setAlignment(QtCore.Qt.AlignCenter)
+        self._layout.addWidget(self._title_label)
 
         self.setStyleSheet(self.STYLE)
+    
+    def set_title(self, title: str):
+        self._title_label.setText(title)
     
     def _update_margins(self, widget: QtWidgets.QWidget):
         widget.ensurePolished()

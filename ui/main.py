@@ -15,6 +15,7 @@ from ..io import io_utils, launchers
 from ..maya import maya_ui, maya_utils
 from ..capture.config import CaptureConfig
 from ..capture.frame_capture import FrameCapture
+from ..ui.frameless_window import FramelessWindow
 from ..ui.combobox import ComboBox, ComboBoxItem
 from ..ui.group_widget import GroupWidget
 from ..ui.icon_button import IconButton
@@ -22,42 +23,41 @@ from ..ui.path_selector import SaveFileWidget
 from ..ui.viewport_visibility_widget import ViewportVisibilityWidget
 from ..ui.settings_widget import SettingsWidget
 from ..ui.spinbox import SpinBox
-from ..ui.title_barre import TitleBarre
 from ..ui.separator import Separator
 
 
-class PlayblastDialog(QtWidgets.QDialog):
+class PlayblastDialog(FramelessWindow):
 
     WINDOW_TITLE = "Maya Best Playblast Ever"
     MIN_WIDTH = 400
-    STYLE = """
-        PlayblastDialog {
+    STYLE = FramelessWindow.STYLE + """
+        PlayblastDialog {{
             background-color: #2b2b2b;
             border: 1px solid #606060;
             border-radius: 4px;
-        }
-        PlayblastDialog QLabel#title_bar {
+        }}
+        PlayblastDialog QLabel#title_bar {{
             color: #e0a020;
             font-size: 13px;
             font-weight: bold;
             padding: 6px 10px;
             border-bottom: 1px solid #444;
-        }
-        PlayblastDialog QPushButton {
+        }}
+        PlayblastDialog QPushButton {{
             border: 1px solid #555;
             border-radius: 3px;
             padding: 3px 8px;
             color: #aaa;
             background-color: #801500;
-        }
-        PlayblastDialog QPushButton:hover {
+        }}
+        PlayblastDialog QPushButton:hover {{
             border-color: #e0a020;
             color: #e0a020;
-        }
-        PlayblastDialog QPushButton:pressed {
+        }}
+        PlayblastDialog QPushButton:pressed {{
             background: #2a2a2a;
-        }
-        PlayblastDialog QPushButton#playblast_button {
+        }}
+        PlayblastDialog QPushButton#playblast_button {{
             background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                         stop:0 #e8572a, stop:1 #c94420);
             border: none;
@@ -65,34 +65,28 @@ class PlayblastDialog(QtWidgets.QDialog):
             color: white;
             font-size: 13px;
             font-weight: bold;
-        }
-        PlayblastDialog QPushButton#playblast_button:hover {
+        }}
+        PlayblastDialog QPushButton#playblast_button:hover {{
             background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                         stop:0 #f06030, stop:1 #d85525);
             color: white;
-        }
-        PlayblastDialog QPushButton#playblast_button:pressed {
+        }}
+        PlayblastDialog QPushButton#playblast_button:pressed {{
             background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                         stop:0 #c94420, stop:1 #b03a18);
-        }
+        }}
     """
 
     def __init__(self, parent: Optional[QtWidgets.QWidget] = None):
-        if parent is None:
-            parent = maya_ui.get_main_window()
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         self.setWindowTitle(self.WINDOW_TITLE)
         self.setMinimumWidth(self.MIN_WIDTH)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool)
-        
+        self.set_header_title(self.WINDOW_TITLE)
+
         self._drag_pos = None
         self._settings = Settings()
-
-        self._main_layout = QtWidgets.QVBoxLayout(self)
-        self._main_layout.setContentsMargins(5, 5, 5, 5)
-        self._main_layout.setSpacing(5)
-        self._main_layout.setAlignment(QtCore.Qt.AlignTop)
 
         self._build_ui()
         self.setStyleSheet(self.STYLE)
@@ -100,17 +94,6 @@ class PlayblastDialog(QtWidgets.QDialog):
     def closeEvent(self, event):
         self._save_settings()
         super().closeEvent(event)
-    
-    def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
-            self._drag_pos = event.globalPos() - self.frameGeometry().topLeft()
-
-    def mouseMoveEvent(self, event):
-        if self._drag_pos and event.buttons() == QtCore.Qt.LeftButton:
-            self.move(event.globalPos() - self._drag_pos)
-
-    def mouseReleaseEvent(self, event):
-        self._drag_pos = None
 
     def _build_ui(self):
         self._build_header()
@@ -134,18 +117,15 @@ class PlayblastDialog(QtWidgets.QDialog):
         self._main_layout.addWidget(self._playblast_button)
     
     def _build_header(self):
-        title_bar = TitleBarre(self.WINDOW_TITLE, self)
-        self._main_layout.addWidget(title_bar)
-
         setting_button = IconButton(SETTINGS_ICON_PATH,
                                     size=30, icon_size=18, parent=self)
         setting_button.clicked.connect(self._on_open_settings_widget)
-        title_bar.add_widget(setting_button)
+        self.add_header_widget(setting_button)
 
         close_button = IconButton(CLOSE_ICON_PATH,
                                   size=30, icon_size=18, parent=self)
         close_button.clicked.connect(self.close)
-        title_bar.add_widget(close_button)
+        self.add_header_widget(close_button)
 
 
     def _build_encoding_group(self):
