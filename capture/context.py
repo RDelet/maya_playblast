@@ -3,7 +3,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from threading import Thread
 
-from maya import OpenMayaUI as omui
+from maya import cmds, OpenMayaUI as omui
 
 from ..io import launchers
 from ..capture.config import CaptureConfig, ViewConfig

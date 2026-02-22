@@ -28,7 +28,7 @@ from ..ui.separator import Separator
 
 class PlayblastDialog(FramelessWindow):
 
-    WINDOW_TITLE = "Maya Best Playblast Ever"
+    WINDOW_TITLE = "Maya Playblast"
     MIN_WIDTH = 400
     STYLE = FramelessWindow.STYLE + """
         PlayblastDialog {{

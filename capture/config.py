@@ -20,8 +20,8 @@ class CaptureConfig:
     end_frame: int | None = None
     frame_rate: int | None = None
     # For custom panel
-    width: int | None = None
-    height: int | None = None
+    width: int | None = 1920 * 0.5
+    height: int | None = 1080 * 0.5
 
     def __post_init__(self) -> None:
         if self.crf < 0 or self.crf > 51:

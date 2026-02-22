@@ -1,3 +1,3 @@
-from maya_playblast._core import record
+from ._core import record, install_dependencies
 
-__all__ = ["record"]
+__all__ = ["record", install_dependencies]
