@@ -58,3 +58,8 @@ class ComboBox(QtWidgets.QWidget):
     @property
     def current_index(self) -> int:
         return self._combo.currentIndex()
+    
+    @current_index.setter
+    def current_index(self, index: int):
+        self._combo.setCurrentIndex(index)
+

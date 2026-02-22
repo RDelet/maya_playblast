@@ -3,8 +3,10 @@ from pathlib import Path
 import subprocess
 
 from maya_playblast.core import constants
-from maya_playblast.capture.config import CaptureConfig, ViewConfig
 from maya_playblast.core.logger import log
+from maya_playblast.core.settings import Settings
+from maya_playblast.capture.config import CaptureConfig, ViewConfig
+
 
 
 def open_player(path: str | Path):
@@ -13,9 +15,15 @@ def open_player(path: str | Path):
     if not path.exists():
         raise RuntimeError(f"Path {path} does not exists !")
 
+    settings = Settings()
+    if not settings.player_path:
+        raise RuntimeError("Player path is not set. Please set it in the settings.")
+    if not settings.player_path.exists():
+        raise RuntimeError(f"Player path {settings.player_path} does not exist. Please check your settings.")
+
     try:
-        log.warning(f"Open file {path} with {constants.PLAYER_PATH}")
-        return subprocess.Popen([str(constants.PLAYER_PATH), str(path)],
+        log.warning(f"Open file {path} with {settings.player_path}")
+        return subprocess.Popen([str(settings.player_path), str(path)],
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                 creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP)
     except Exception as e:
@@ -23,7 +31,13 @@ def open_player(path: str | Path):
 
 
 def ffmpeg_capture(config: CaptureConfig, view_cfg: ViewConfig):
-    proc_cmd = [str(constants.FFMPEG_PATH),
+    settings = Settings()
+    if not settings.ffmpeg_path:
+        raise RuntimeError("FFmpeg path is not set. Please set it in the settings.")
+    if not settings.ffmpeg_path.exists():
+        raise RuntimeError(f"FFmpeg path {settings.ffmpeg_path} does not exist. Please check your settings.")
+
+    proc_cmd = [settings.ffmpeg_path,
                 '-y',
                 '-f', 'rawvideo',
                 '-vcodec', 'rawvideo',

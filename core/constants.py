@@ -1,7 +1,11 @@
 from pathlib import Path
 
-FFMPEG_PATH = Path(r"D:\Shared\ffmpeg\ffmpeg.exe")
-PLAYER_PATH = Path(r"D:\Shared\OpenRV\rv.exe")
+
+ROOT_PATH = Path(__file__).parent.parent
+SETTINGS_PATH = ROOT_PATH / "settings.ini"
+CLOSE_ICON_PATH = ROOT_PATH / "icons" / "close.svg"
+SETTINGS_ICON_PATH = ROOT_PATH / "icons" / "settings.svg"
+
 
 MUXERS = [('mp4', 'MP4 (MPEG-4 Part 14)'),
           ('mov', 'QuickTime / MOV'),
@@ -23,6 +27,7 @@ MUXERS = [('mp4', 'MP4 (MPEG-4 Part 14)'),
           ('ivf', 'On2 IVF'),
           ('asf', 'ASF (Advanced / Active Streaming Format)'),
           ('rm', 'RealMedia')]
+
 
 VIDEO_ENCODERS = [('libx264', 'libx264 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10'),
                   ('libx264rgb', 'libx264 H.264 / AVC (RGB variant)'),

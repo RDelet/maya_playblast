@@ -52,7 +52,8 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
         }
     """
 
-    def __init__(self, parent: QtWidgets.QWidget | None = None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None,
+                 viewport_flags: dict[str, bool] | None = None):
         super().__init__(parent)
 
         self._flag_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
@@ -61,11 +62,11 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
         self._layout.setContentsMargins(0, 0, 0, 0)
         self._layout.setSpacing(2)
 
-        self._build_checkboxes()
+        self._build_checkboxes(viewport_flags)
         self._build_buttons()
         self.setStyleSheet(self.STYLE)
 
-    def _build_checkboxes(self, columns: int = 3):
+    def _build_checkboxes(self, viewport_flags: dict[str, bool] | None = None, columns: int = 3):
         grid_layout = QtWidgets.QGridLayout(self)
         grid_layout.setSpacing(2)
         grid_layout.setContentsMargins(0, 0, 0, 0)
@@ -73,7 +74,10 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
 
         for idx, flag in enumerate(VIEWPORT_FLAGS):
             widget = QtWidgets.QCheckBox(flag.name)
-            widget.setChecked(flag.keep_visible)
+            if viewport_flags and flag.name in viewport_flags:
+                widget.setChecked(viewport_flags[flag.name])
+            else:
+                widget.setChecked(flag.keep_visible)
             self._flag_checkboxes[flag.name] = widget
             grid_layout.addWidget(widget, idx // columns, idx % columns)
     
@@ -107,3 +111,7 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
             view_config.flags[name] = widget.isChecked()
 
         return view_config
+    
+    @property
+    def flag_widgets(self) -> dict[str, QtWidgets.QCheckBox]:
+        return self._flag_checkboxes
