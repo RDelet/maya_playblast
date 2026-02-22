@@ -36,7 +36,7 @@ def ffmpeg_capture(config: CaptureConfig, view_cfg: ViewConfig):
     if not settings.ffmpeg_path.exists():
         raise RuntimeError(f"FFmpeg path {settings.ffmpeg_path} does not exist. Please check your settings.")
 
-    proc_cmd = [settings.ffmpeg_path,
+    proc_cmd = [str(settings.ffmpeg_path),
                 '-y',
                 '-f', 'rawvideo',
                 '-vcodec', 'rawvideo',

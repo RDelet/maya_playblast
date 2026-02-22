@@ -8,7 +8,10 @@ except:
     from PySide6 import QtCore
 
 from ..core.constants import SETTINGS_PATH
+from ..io.io_utils import search_exe
 from ..maya.viewport import VIEWPORT_FLAGS
+
+from ..core.logger import log
 
 
 class Settings:
@@ -27,6 +30,31 @@ class Settings:
         self._setting = QtCore.QSettings(str(SETTINGS_PATH), QtCore.QSettings.IniFormat)
         self._initialized = True
 
+        self._check_ffpeg_path()
+        self._check_player_path()
+    
+    def _check_ffpeg_path(self):
+        if not self.ffmpeg_path or not self.ffmpeg_path.exists:
+            path = search_exe("ffmpeg")
+            if path:
+                self.ffmpeg_path = path
+                self.save()
+            else:
+                log.warning("ffmpeg not found in PATH. Please set the path to ffmpeg executable in the settings.")
+    
+    def _check_player_path(self):
+        if not self.player_path or not self.player_path.exists:
+            path = search_exe("OpenRV")
+            if not path:
+                log.warning("OpenRV not found in PATH. Checking for vlc...")
+            path = search_exe("vlc")
+            if not path:
+                log.warning("vlc not found in PATH. Please set the path to vlc executable in the settings.")
+            
+            if path:
+                self.player_path = path
+                self.save()
+    
     @property
     def ffmpeg_path(self) -> Path | None:
         val = self._setting.value("paths/ffmpeg", None)
@@ -35,6 +63,8 @@ class Settings:
     @ffmpeg_path.setter
     def ffmpeg_path(self, value: str | Path | None):
         if value:
+            if not isinstance(value, (str, Path)):
+                value = Path(value)
             self._setting.setValue("paths/ffmpeg", str(value))
         else:
             self._setting.remove("paths/ffmpeg")
@@ -47,6 +77,8 @@ class Settings:
     @player_path.setter
     def player_path(self, value: str | Path | None):
         if value:
+            if not isinstance(value, (str, Path)):
+                value = Path(value)
             self._setting.setValue("paths/player", str(value))
         else:
             self._setting.remove("paths/player")

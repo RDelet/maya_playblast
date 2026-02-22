@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from pathlib import Path
+import shutil
 
 
 def increment_file_path(path: str | Path) -> Path:
@@ -29,3 +31,11 @@ def check_directory(path: str | Path, build: bool = True) -> bool:
             return False
     
     return path.exists()
+
+
+def search_exe(exe_name: str) -> Path | None:
+    found = shutil.which(exe_name)
+    if found:
+        return Path(found)
+
+    return None
