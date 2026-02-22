@@ -213,4 +213,5 @@ class PlayblastDialog(FramelessWindow):
         self._settings.save()
 
     def _resize_window(self, *args):
-        self.adjustSize()
+        self.layout().activate()
+        self.resize(self.width(), self.sizeHint().height())
