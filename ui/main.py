@@ -23,6 +23,7 @@ from ..ui.viewport_visibility_widget import ViewportVisibilityWidget
 from ..ui.settings_widget import SettingsWidget
 from ..ui.spinbox import SpinBox
 from ..ui.title_barre import TitleBarre
+from ..ui.separator import Separator
 
 
 class PlayblastDialog(QtWidgets.QDialog):
@@ -89,8 +90,8 @@ class PlayblastDialog(QtWidgets.QDialog):
         self._settings = Settings()
 
         self._main_layout = QtWidgets.QVBoxLayout(self)
-        self._main_layout.setContentsMargins(2, 2, 2, 2)
-        self._main_layout.setSpacing(2)
+        self._main_layout.setContentsMargins(5, 5, 5, 5)
+        self._main_layout.setSpacing(5)
         self._main_layout.setAlignment(QtCore.Qt.AlignTop)
 
         self._build_ui()
@@ -113,11 +114,19 @@ class PlayblastDialog(QtWidgets.QDialog):
 
     def _build_ui(self):
         self._build_header()
-        self._build_output_group()
+
+        self._main_layout.addWidget(Separator("", parent=self))
+
+        self._path_selector = SaveFileWidget("Output Path", extension=MUXERS[0][0], parent=self)
+        if self._settings.output_path:
+            self._path_selector.set_path(self._settings.output_path)
+        self._main_layout.addWidget(self._path_selector)
+
+        self._build_encoding_group()
         self._build_visibility_group()
-        # self._build_encoding_group()
 
         self._main_layout.addStretch()
+        self._main_layout.addWidget(Separator("", parent=self))
 
         self._playblast_button = QtWidgets.QPushButton("Playblast", self)
         self._playblast_button.setFixedHeight(50)
@@ -139,43 +148,37 @@ class PlayblastDialog(QtWidgets.QDialog):
         title_bar.add_widget(close_button)
 
 
-    def _build_output_group(self):
-        self._output_widget = GroupWidget("Output", expanded=True, parent=self)
-        self._main_layout.addWidget(self._output_widget)
+    def _build_encoding_group(self):
 
-        self._path_selector = SaveFileWidget("Output Path", extension=MUXERS[0][0], parent=self)
-        if self._settings.output_path:
-            self._path_selector.set_path(self._settings.output_path)
-        self._output_widget.add_widget(self._path_selector)
+        self._encoding_widget = GroupWidget("Encoding", expanded=False, parent=self)
+        self._encoding_widget.toggled.connect(self._resize_window)
+        self._main_layout.addWidget(self._encoding_widget)
 
         muser_items = [ComboBoxItem(x[0], x[1]) for x in MUXERS]
         self._muxers = ComboBox("Containers", muser_items)
         self._muxers.add_callback(self._on_muxer_changed)
         if self._settings.muxer is not None:
             self._muxers.current_index = int(self._settings.muxer)
-        self._output_widget.add_widget(self._muxers)
+        self._encoding_widget.add_widget(self._muxers)
 
         encoder_items = [ComboBoxItem(x[0], x[1]) for x in VIDEO_ENCODERS]
         self._encoders = ComboBox("Encoders", encoder_items)
         if self._settings.encoder is not None:
             self._encoders.current_index = int(self._settings.encoder)
-        self._output_widget.add_widget(self._encoders)
+        self._encoding_widget.add_widget(self._encoders)
 
         self._crf_widget = SpinBox("CRF", range=(0, 51), default_value=24)
         if self._settings.last_crf is not None:
             self._crf_widget.value = int(self._settings.last_crf)
-        self._output_widget.add_widget(self._crf_widget)
+        self._encoding_widget.add_widget(self._crf_widget)
     
     def _build_visibility_group(self):
         self._visibility_widget = GroupWidget("Visibility", expanded=False, parent=self)
+        self._visibility_widget.toggled.connect(self._resize_window)
         self._main_layout.addWidget(self._visibility_widget)
 
         self._viewport_widget = ViewportVisibilityWidget(self, self._settings.viewport_flags)
         self._visibility_widget.add_widget(self._viewport_widget)
-    
-    def _build_encoding_group(self):
-        self._encoding_widget = GroupWidget("Encoding", expanded=False, parent=self)
-        self._main_layout.addWidget(self._encoding_widget)
     
     @property
     def output_path(self) -> Path |None:
@@ -201,7 +204,7 @@ class PlayblastDialog(QtWidgets.QDialog):
         self._path_selector.update_extension(self.extension)
 
     def _on_open_settings_widget(self):
-        SettingsWidget(self).show()
+        SettingsWidget(maya_ui.get_main_window()).show()
 
     def _on_playblast_clicked(self):
         if not self.output_path:
@@ -228,3 +231,6 @@ class PlayblastDialog(QtWidgets.QDialog):
         flags = self._viewport_widget.flag_widgets
         self._settings.viewport_flags = {name: x.isChecked() for name, x in flags.items()}
         self._settings.save()
+
+    def _resize_window(self, *args):
+        self.adjustSize()

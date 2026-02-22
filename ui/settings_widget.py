@@ -12,6 +12,7 @@ from ..core.settings import Settings
 from ..ui.icon_button import IconButton
 from ..ui.path_selector import FileSelector
 from ..ui.title_barre import TitleBarre
+from ..ui.separator import Separator
 
 
 class SettingsWidget(QtWidgets.QWidget):
@@ -44,8 +45,8 @@ class SettingsWidget(QtWidgets.QWidget):
         self._settings = Settings()
 
         self._main_layout = QtWidgets.QVBoxLayout(self)
-        self._main_layout.setContentsMargins(2, 2, 2, 2)
-        self._main_layout.setSpacing(2)
+        self._main_layout.setContentsMargins(5, 5, 5, 5)
+        self._main_layout.setSpacing(5)
         self._main_layout.setAlignment(QtCore.Qt.AlignTop)
 
         self._build_ui()
@@ -65,6 +66,7 @@ class SettingsWidget(QtWidgets.QWidget):
 
     def _build_ui(self):
         self._build_header()
+        self._main_layout.addWidget(Separator("", parent=self))
 
         self._ffmpeg_selector = FileSelector("FFmpeg Path", "exe", parent=self)
         self._ffmpeg_selector.FILE_SELECTED.connect(self._on_ffmpeg_selected)

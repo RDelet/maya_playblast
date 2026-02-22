@@ -9,6 +9,7 @@ except:
 class GroupWidget(QtWidgets.QWidget):
 
     kBaseHeaderColor = [220, 100, 0]
+    toggled = QtCore.Signal(bool)  
 
     def __init__(self, title, expanded: bool = True,
                  header_color: list = kBaseHeaderColor, parent=None):
@@ -91,6 +92,7 @@ class GroupWidget(QtWidgets.QWidget):
     def __on_expand_clicked(self):
         self._expanded = self._expand.arrowType() == QtCore.Qt.RightArrow
         self.set_expanded(self._expanded)
+        self.toggled.emit(self._expanded)
 
     def add_widget(self, widget: QtWidgets.QWidget):
         self._widget.layout().addWidget(widget)
