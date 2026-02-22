@@ -3,24 +3,26 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
-from PySide2 import QtCore, QtWidgets
+try:
+    from PySide2 import QtCore, QtWidgets
+except:
+    from PySide6 import QtCore, QtWidgets
 
-from maya_playblast.core.logger import log
-from maya_playblast.core.constants import MUXERS, VIDEO_ENCODERS, CLOSE_ICON_PATH, SETTINGS_ICON_PATH
-from maya_playblast.core.settings import Settings
-from maya_playblast.io import io_utils, launchers
-from maya_playblast.maya import maya_ui, maya_utils
-from maya_playblast.maya.viewport import VIEWPORT_FLAGS
-from maya_playblast.capture.config import CaptureConfig
-from maya_playblast.capture.frame_capture import FrameCapture
-from maya_playblast.ui.combobox import ComboBox, ComboBoxItem
-from maya_playblast.ui.group_widget import GroupWidget
-from maya_playblast.ui.icon_button import IconButton
-from maya_playblast.ui.path_selector import SaveFileWidget
-from maya_playblast.ui.viewport_visibility_widget import ViewportVisibilityWidget
-from maya_playblast.ui.settings_widget import SettingsWidget
-from maya_playblast.ui.spinbox import SpinBox
-from maya_playblast.ui.title_barre import TitleBarre
+from ..core.logger import log
+from ..core.constants import MUXERS, VIDEO_ENCODERS, CLOSE_ICON_PATH, SETTINGS_ICON_PATH
+from ..core.settings import Settings
+from ..io import io_utils, launchers
+from ..maya import maya_ui, maya_utils
+from ..capture.config import CaptureConfig
+from ..capture.frame_capture import FrameCapture
+from ..ui.combobox import ComboBox, ComboBoxItem
+from ..ui.group_widget import GroupWidget
+from ..ui.icon_button import IconButton
+from ..ui.path_selector import SaveFileWidget
+from ..ui.viewport_visibility_widget import ViewportVisibilityWidget
+from ..ui.settings_widget import SettingsWidget
+from ..ui.spinbox import SpinBox
+from ..ui.title_barre import TitleBarre
 
 
 class PlayblastDialog(QtWidgets.QDialog):

@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide2 import QtCore, QtWidgets
+try:
+    from PySide2 import QtCore, QtWidgets
+except:
+    from PySide6 import QtCore, QtWidgets
 
 
 class SaveFileWidget(QtWidgets.QWidget):

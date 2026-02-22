@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide2 import QtCore, QtGui, QtSvg, QtWidgets
+try:
+    from PySide2 import QtCore, QtGui, QtSvg, QtWidgets
+except:
+    from PySide6 import QtCore, QtGui, QtSvg, QtWidgets
 
 
 class IconButton(QtWidgets.QPushButton):

@@ -2,13 +2,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide2 import QtCore, QtWidgets
+try:
+    from PySide2 import QtCore, QtWidgets
+except:
+    from PySide6 import QtCore, QtWidgets
 
-from maya_playblast.core.constants import CLOSE_ICON_PATH
-from maya_playblast.core.settings import Settings
-from maya_playblast.ui.icon_button import IconButton
-from maya_playblast.ui.path_selector import FileSelector
-from maya_playblast.ui.title_barre import TitleBarre
+from ..core.constants import CLOSE_ICON_PATH
+from ..core.settings import Settings
+from ..ui.icon_button import IconButton
+from ..ui.path_selector import FileSelector
+from ..ui.title_barre import TitleBarre
 
 
 class SettingsWidget(QtWidgets.QWidget):

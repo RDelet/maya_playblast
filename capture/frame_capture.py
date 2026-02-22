@@ -3,11 +3,11 @@ from __future__ import annotations
 import ctypes
 import numpy as np
 
-from maya_playblast.capture import context
-from maya_playblast.core import signal
-from maya_playblast.maya import maya_utils
-from maya_playblast.capture.config import CaptureConfig, ViewConfig
-from maya_playblast.core.logger import log
+from ..capture import context
+from ..core import signal
+from ..maya import maya_utils
+from ..capture.config import CaptureConfig, ViewConfig
+from ..core.logger import log
 
 
 class FrameCapture:

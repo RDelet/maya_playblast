@@ -2,10 +2,9 @@ from __future__ import annotations
 from pathlib import Path
 import subprocess
 
-from maya_playblast.core import constants
-from maya_playblast.core.logger import log
-from maya_playblast.core.settings import Settings
-from maya_playblast.capture.config import CaptureConfig, ViewConfig
+from ..core.logger import log
+from ..core.settings import Settings
+from ..capture.config import CaptureConfig, ViewConfig
 
 
 

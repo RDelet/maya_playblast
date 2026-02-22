@@ -2,10 +2,13 @@ from __future__ import annotations
 
 from functools import partial
 
-from PySide2 import QtWidgets
+try:
+    from PySide2 import QtWidgets
+except:
+    from PySide6 import QtWidgets
 
-from maya_playblast.capture.config import ViewConfig
-from maya_playblast.maya.viewport import VIEWPORT_FLAGS
+from ..capture.config import ViewConfig
+from ..maya.viewport import VIEWPORT_FLAGS
 
 
 class ViewportVisibilityWidget(QtWidgets.QWidget):

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from PySide2 import QtWidgets
+try:
+    from PySide2 import QtWidgets
+except:
+    from PySide6 import QtWidgets
 
 
 class ComboBoxItem:

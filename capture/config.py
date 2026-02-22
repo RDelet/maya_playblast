@@ -5,9 +5,9 @@ from pathlib import Path
 
 from maya import OpenMayaUI as omui
 
-from maya_playblast.io import io_utils
-from maya_playblast.maya import maya_ui, maya_utils
-from maya_playblast.maya.viewport import ViewportFlags, VIEWPORT_FLAGS
+from ..io import io_utils
+from ..maya import maya_ui, maya_utils
+from ..maya.viewport import ViewportFlags, VIEWPORT_FLAGS
 
 
 @dataclass

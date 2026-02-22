@@ -2,10 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide2 import QtCore
+try:
+    from PySide2 import QtCore
+except:
+    from PySide6 import QtCore
 
-from maya_playblast.core.constants import SETTINGS_PATH
-from maya_playblast.maya.viewport import VIEWPORT_FLAGS
+from ..core.constants import SETTINGS_PATH
+from ..maya.viewport import VIEWPORT_FLAGS
 
 
 class Settings:

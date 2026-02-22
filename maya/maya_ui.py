@@ -1,7 +1,11 @@
 from __future__ import annotations
 
-from PySide2 import QtWidgets
-from shiboken2 import wrapInstance, getCppPointer
+try:
+    from PySide2 import QtWidgets
+    from shiboken2 import wrapInstance, getCppPointer
+except:
+    from PySide6 import QtWidgets
+    from shiboken6 import wrapInstance, getCppPointer
 
 from maya import cmds, OpenMayaUI as omui
 

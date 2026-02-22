@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from maya import cmds
 
-from maya_playblast.core.logger import log
+from ..core.logger import log
 
 
 @dataclass

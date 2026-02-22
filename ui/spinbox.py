@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from PySide2 import QtCore, QtWidgets
+try:
+    from PySide2 import QtCore, QtWidgets
+except:
+    from PySide6 import QtCore, QtWidgets
 
 
 class SpinBox(QtWidgets.QWidget):
