@@ -24,12 +24,14 @@ class OgsRenderBackend(CaptureBackend):
         super().__init__(view_config)
 
     def is_available(self) -> bool:
+        return False
         is_batch = cmds.about(batch=True)
         if not _available:
             log.debug("OGSRenderBackend not available because PIL is not installed.")
         return is_batch and _available
 
     def capture_frame(self, frame: int) -> np.ndarray:
+        print("HODOR")
         maya_utils.current_time(frame)
 
         img_path = Path(cmds.ogsRender(frame=float(frame),
