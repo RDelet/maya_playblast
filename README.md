@@ -53,18 +53,12 @@ view   = maya_ui.get_active_view()
 width  = view.portWidth()
 height = view.portHeight()
 
-# Force first capture. But why ?...
-try:
-    cmds.readPixels()
-except :
-    pass
-
 with VP2Override(view):
     ptr_str = cmds.readPixels()
 
 ptr = int(ptr_str)
 c_array = (ctypes.c_uint8 * (width * height * 4)).from_address(ptr)
-array = np.ctypeslib.as_array(c_array).reshape((height, width, 4)).copy()[::-1]
+array = np.ctypeslib.as_array(c_array).reshape((height, width, 4)).copy()
 
 output_path = r"D:\output.png"
 Image.fromarray(array, mode="RGBA").save(output_path)

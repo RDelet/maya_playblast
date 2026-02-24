@@ -5,14 +5,12 @@
 #include <maya/MArgDatabase.h>
 #include <maya/MGlobal.h>
 #include <maya/MString.h>
-#include <maya/MStringArray.h>
 #include <maya/MViewport2Renderer.h>
 #include <maya/M3dView.h>
 
 #include <memory>
 #include <string>
 #include <cstring>
-#include <utility>
 
 const char* ReadPixelsCmd::kCommandName = "readPixels";
 
@@ -36,28 +34,11 @@ using OverridePtr = std::unique_ptr<OffscreenRenderOverride, OverrideDeleter>;
 static OverridePtr   s_override;
 static const MString kOverrideName("PlayblastOffscreenOverride");
 
+
 void ReadPixelsCmd::cleanup()
 {
     s_override.reset();
 }
-
-struct OverrideGuard
-{
-    MString panel;
-
-    OverrideGuard(const MString& p, const MString& name) : panel(p)
-    {
-        MGlobal::executeCommand("modelEditor -e -rendererOverrideName \"" + name + "\" " + panel);
-    }
-
-    ~OverrideGuard()
-    {
-        MGlobal::executeCommand("modelEditor -e -rendererOverrideName \"\" " + panel);
-    }
-
-    OverrideGuard(const OverrideGuard&) = delete;
-    OverrideGuard& operator=(const OverrideGuard&) = delete;
-};
 
 MSyntax ReadPixelsCmd::newSyntax()
 {
@@ -72,6 +53,24 @@ void* ReadPixelsCmd::creator()
 {
     return new ReadPixelsCmd();
 }
+
+struct ViewOverrideGuard
+{
+    M3dView& view;
+    
+    ViewOverrideGuard(M3dView& v, const MString& overrideName) : view(v)
+    {
+        view.setRenderOverrideName(overrideName);
+    }
+    ~ViewOverrideGuard()
+    {
+        view.setRenderOverrideName(MString(""));
+    }
+
+    ViewOverrideGuard(const ViewOverrideGuard&) = delete;
+    ViewOverrideGuard& operator=(const ViewOverrideGuard&) = delete;
+};
+
 
 MStatus ReadPixelsCmd::doIt(const MArgList& argList)
 {
@@ -93,17 +92,28 @@ MStatus ReadPixelsCmd::doIt(const MArgList& argList)
         if (!status)
         {
             delete raw;
-            MGlobal::displayError("ReadPixelsCmd: registerOverride failes.");
+            MGlobal::displayError("ReadPixelsCmd: registerOverride failed.");
             return MS::kFailure;
         }
         s_override.reset(raw);
     }
 
-    // ToDo: Solve this issue
+    M3dView activeView = M3dView::active3dView(&status);
+    if (!status)
+    {
+        MGlobal::displayError("ReadPixelsCmd: could not get active 3d view.");
+        return MS::kFailure;
+    }
+
+    {
+        ViewOverrideGuard guard(activeView, kOverrideName);
+        activeView.refresh(false, true);
+    }
+
     CaptureOperation* captureOp = s_override->captureOp();
     if (captureOp == nullptr || !captureOp->ready)
     {
-        MGlobal::displayError("ReadPixelsCmd: no pixels — call refresh before ?");
+        MGlobal::displayError("ReadPixelsCmd: capture failed after forced refresh.");
         return MS::kFailure;
     }
 
@@ -115,7 +125,6 @@ MStatus ReadPixelsCmd::doIt(const MArgList& argList)
     const std::string ptrStr = std::to_string(
         reinterpret_cast<uintptr_t>(s_buffer.data())
     );
-
     setResult(MString(ptrStr.c_str()));
 
     return MS::kSuccess;

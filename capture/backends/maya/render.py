@@ -22,14 +22,6 @@ class RenderBackend(CaptureBackend):
             log.debug(f'PluginBackend — plugin "{PLUGIN_NAME}" not loaded.')
             return False
         return True
-    
-    def setup(self):
-        # Force first capture. But why ?...
-        try:
-            cmds.readPixels()
-        except :
-            pass
-        return super().setup()
 
     def capture_frame(self, frame: int) -> np.ndarray:
         maya_utils.current_time(frame)
