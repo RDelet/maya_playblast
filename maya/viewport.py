@@ -101,12 +101,7 @@ VIEWPORT_FLAGS = ViewportFlags(flags=[
 ])
 
 
-def disable_viewport_state(panel: str):
-    filtered = [ViewportFlag(f.name, f.keep_visible, f.keep_visible) for f in VIEWPORT_FLAGS]
-    set_viewport_state(panel, filtered)
-
-
-def set_viewport_state(panel: str, states: List[ViewportFlag]):
+def set_viewport_state(panel: str, states: List[ViewportFlag] | ViewportFlags):
     for state in states:
         try:
             cmds.modelEditor(panel, edit=True, **state.as_dict)

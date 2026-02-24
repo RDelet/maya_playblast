@@ -8,7 +8,8 @@ except:
     from PySide6 import QtWidgets
 
 from ..capture.config import ViewConfig
-from ..maya.viewport import VIEWPORT_FLAGS
+from ..maya import maya_ui
+from ..maya.viewport import set_viewport_state, VIEWPORT_FLAGS
 
 
 class ViewportVisibilityWidget(QtWidgets.QWidget):
@@ -97,7 +98,16 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
         all_button.clicked.connect(partial(self._set_all_flags, True))
         none_button.clicked.connect(partial(self._set_all_flags, False))
         reset_button.clicked.connect(self._reset_flags)
+
+        apply_button = QtWidgets.QPushButton("Apply")
+        apply_button.clicked.connect(self._apply)
+        self._layout.addWidget(apply_button)
     
+    def _apply(self):
+        view_config = self.config
+        name = maya_ui.get_editor_from_view(view_config.view)
+        set_viewport_state(name, view_config.flags)
+
     def _set_all_flags(self, value: bool):
         for chk in self._flag_checkboxes.values():
             chk.setChecked(value)

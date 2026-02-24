@@ -13,8 +13,8 @@ from ..capture.config import CaptureConfig, ViewConfig
 
 
 @contextmanager
-def SetEditorFlag(view: omui.M3dView):
-    name = maya_ui.get_editor_from_view(view)
+def SetEditorFlag(view_cfg: ViewConfig):
+    name = maya_ui.get_editor_from_view(view_cfg.view)
     if not name:
         log.warning("Impossible to get editor from view.")
         yield
@@ -22,7 +22,7 @@ def SetEditorFlag(view: omui.M3dView):
 
     states = viewport.VIEWPORT_FLAGS.snapshot(name)
     try:
-        yield viewport.disable_viewport_state(name)
+        yield viewport.set_viewport_state(name, view_cfg.flags)
     finally:
         viewport.set_viewport_state(name, states)
 

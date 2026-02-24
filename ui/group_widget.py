@@ -9,7 +9,7 @@ except:
 class GroupWidget(QtWidgets.QWidget):
 
     kBaseHeaderColor = [220, 100, 0]
-    toggled = QtCore.Signal(bool)  
+    toggled = QtCore.Signal(bool)
 
     def __init__(self, title, expanded: bool = True,
                  header_color: list = kBaseHeaderColor, parent=None):

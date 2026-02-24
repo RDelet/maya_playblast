@@ -11,23 +11,30 @@ except ImportError:
 class BasePathWidget(QtWidgets.QWidget):
 
     STYLE = """
-        BasePathWidget QLineEdit {{
+        {class_name} QLineEdit {{
             background: #1e1e1e;
             border: 1px solid #555;
             border-radius: 3px;
             padding: 3px 6px;
             color: #ddd;
         }}
-        BasePathWidget QLineEdit:hover {{ border-color: #e0a020; }}
-        BasePathWidget QPushButton {{
-            background: transparent;
+        {class_name} QLineEdit:hover {{
+            border-color: #e0a020;
+        }}
+        {class_name} QPushButton {{
             border: 1px solid #555;
             border-radius: 3px;
             padding: 3px 8px;
-            color: #aaa;
+            color: white;
+            background-color: #2c2c2c;
         }}
-        BasePathWidget QPushButton:hover {{ border-color: #e0a020; color: #e0a020; }}
-        BasePathWidget QPushButton:pressed {{ background: #2a2a2a; }}
+        {class_name} QPushButton:hover {{
+            border-color: #e0a020;
+            color: #e0a020;
+        }}
+        {class_name} QPushButton:pressed {{
+            background: #2a2a2a;
+        }}
     """
 
     def __init__(self, name: str, label_size: int = 80,
@@ -50,7 +57,7 @@ class BasePathWidget(QtWidgets.QWidget):
         self._browse_button.clicked.connect(self._on_browse_clicked)
         layout.addWidget(self._browse_button)
 
-        self.setStyleSheet(self.STYLE.replace("BasePathWidget", type(self).__name__))
+        self.setStyleSheet(self.STYLE.format(class_name=type(self).__name__))
 
     @property
     def path(self) -> Path | None:
@@ -81,7 +88,6 @@ class SaveFileWidget(BasePathWidget):
         dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         dialog.setNameFilters([f"Files (*.{self._extension})", "All Files (*)"])
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            print("Hodor", dialog.selectedFiles())
             self.set_path(dialog.selectedFiles()[0])
 
 

@@ -35,7 +35,7 @@ class FrameCapture:
         try:
             self._backend.setup()
 
-            with context.SetEditorFlag(self._view_cfg.view):
+            with context.SetEditorFlag(self._view_cfg):
                 with context.ImageToVideo(cfg, self._view_cfg) as proc:
                     for i in range(cfg.frame_count):
                         current = cfg.start_frame + i

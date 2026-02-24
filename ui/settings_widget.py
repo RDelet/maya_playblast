@@ -20,20 +20,6 @@ class SettingsWidget(FramelessWindow):
 
     WINDOW_TITLE = "Maya Playblast Settings"
     MIN_WIDTH = 400
-    STYLE = """
-        SettingsWidget {{
-            background-color: #2b2b2b;
-            border: 1px solid #606060;
-            border-radius: 4px;
-        }}
-        SettingsWidget QLabel#title_bar {{
-            color: #e0a020;
-            font-size: 13px;
-            font-weight: bold;
-            padding: 6px 10px;
-            border-bottom: 1px solid #444;
-        }}
-    """
 
     def __init__(self, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent=parent)
@@ -48,7 +34,6 @@ class SettingsWidget(FramelessWindow):
 
         self._build_ui()
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        self.setStyleSheet(self.STYLE)
 
     def _build_ui(self):
         self._build_header()

@@ -43,33 +43,16 @@ class PlayblastDialog(FramelessWindow):
             padding: 6px 10px;
             border-bottom: 1px solid #444;
         }}
-        PlayblastDialog QPushButton {{
+        PlayblastDialog QPushButton#playblast_button {{
             border: 1px solid #555;
             border-radius: 3px;
             padding: 3px 8px;
-            color: #aaa;
+            color: white;
             background-color: #801500;
         }}
-        PlayblastDialog QPushButton:hover {{
+        PlayblastDialog QPushButton#playblast_button:hover {{
             border-color: #e0a020;
             color: #e0a020;
-        }}
-        PlayblastDialog QPushButton:pressed {{
-            background: #2a2a2a;
-        }}
-        PlayblastDialog QPushButton#playblast_button {{
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                                        stop:0 #e8572a, stop:1 #c94420);
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 13px;
-            font-weight: bold;
-        }}
-        PlayblastDialog QPushButton#playblast_button:hover {{
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                                        stop:0 #f06030, stop:1 #d85525);
-            color: white;
         }}
         PlayblastDialog QPushButton#playblast_button:pressed {{
             background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
@@ -112,6 +95,7 @@ class PlayblastDialog(FramelessWindow):
         self._main_layout.addWidget(Separator("", parent=self))
 
         self._playblast_button = QtWidgets.QPushButton("Playblast", self)
+        self._playblast_button.setObjectName("playblast_button")
         self._playblast_button.setFixedHeight(50)
         self._playblast_button.clicked.connect(self._on_playblast_clicked)
         self._main_layout.addWidget(self._playblast_button)
