@@ -40,7 +40,7 @@ def ffmpeg_capture(config: CaptureConfig, view_cfg: ViewConfig):
                 '-y',
                 '-f', 'rawvideo',
                 '-vcodec', 'rawvideo',
-                '-pix_fmt', 'rgba',
+                '-pix_fmt', 'bgra',
                 '-s', f'{view_cfg.width}x{view_cfg.height}',
                 '-framerate', f'{config.frame_rate}',
                 '-i', '-',
