@@ -1,4 +1,5 @@
 #include "read_pixels_cmd.h"
+#include "capture_operation.h"
 #include "offscreen_override.h"
 
 #include <maya/MArgDatabase.h>
@@ -20,7 +21,6 @@ uint32_t             ReadPixelsCmd::s_width  = 0;
 uint32_t             ReadPixelsCmd::s_height = 0;
 
 
-// ─── OverrideDeleter — défini ici, OffscreenRenderOverride est connu ──────────
 struct OverrideDeleter {
     void operator()(OffscreenRenderOverride* ptr) const noexcept {
         if (ptr == nullptr) return;
@@ -36,67 +36,29 @@ using OverridePtr = std::unique_ptr<OffscreenRenderOverride, OverrideDeleter>;
 static OverridePtr   s_override;
 static const MString kOverrideName("PlayblastOffscreenOverride");
 
-
-// ─── Cleanup appelé depuis uninitializePlugin ────────────────────────────────
 void ReadPixelsCmd::cleanup()
 {
     s_override.reset();
 }
 
-
-// ─── RAII — restaure la caméra du panel quoi qu'il arrive ───────────────────
-struct CameraGuard
-{
-    MString panel;
-    MString previous;
-    bool    active = false;
-
-    CameraGuard(const MString& p, const MString& requested)
-        : panel(p), active(requested.length() > 0)
-    {
-        if (!active) return;
-        MGlobal::executeCommand("modelPanel -q -camera " + panel, previous);
-        MGlobal::executeCommand("modelPanel -e -camera " + requested + " " + panel);
-    }
-
-    ~CameraGuard()
-    {
-        if (active && previous.length() > 0)
-            MGlobal::executeCommand(
-                "modelPanel -e -camera " + previous + " " + panel
-            );
-    }
-
-    CameraGuard(const CameraGuard&)            = delete;
-    CameraGuard& operator=(const CameraGuard&) = delete;
-};
-
-
-// ─── RAII — désactive l'override sur le panel quoi qu'il arrive ─────────────
 struct OverrideGuard
 {
     MString panel;
 
     OverrideGuard(const MString& p, const MString& name) : panel(p)
     {
-        MGlobal::executeCommand(
-            "modelEditor -e -rendererOverrideName \"" + name + "\" " + panel
-        );
+        MGlobal::executeCommand("modelEditor -e -rendererOverrideName \"" + name + "\" " + panel);
     }
 
     ~OverrideGuard()
     {
-        MGlobal::executeCommand(
-            "modelEditor -e -rendererOverrideName \"\" " + panel
-        );
+        MGlobal::executeCommand("modelEditor -e -rendererOverrideName \"\" " + panel);
     }
 
-    OverrideGuard(const OverrideGuard&)            = delete;
+    OverrideGuard(const OverrideGuard&) = delete;
     OverrideGuard& operator=(const OverrideGuard&) = delete;
 };
 
-
-// ─── Syntax ──────────────────────────────────────────────────────────────────
 MSyntax ReadPixelsCmd::newSyntax()
 {
     MSyntax syntax;
@@ -111,8 +73,6 @@ void* ReadPixelsCmd::creator()
     return new ReadPixelsCmd();
 }
 
-
-// ─── doIt ────────────────────────────────────────────────────────────────────
 MStatus ReadPixelsCmd::doIt(const MArgList& argList)
 {
     MStatus status;
@@ -122,11 +82,10 @@ MStatus ReadPixelsCmd::doIt(const MArgList& argList)
     auto* renderer = MHWRender::MRenderer::theRenderer();
     if (renderer == nullptr)
     {
-        MGlobal::displayError("ReadPixelsCmd: MRenderer introuvable.");
+        MGlobal::displayError("ReadPixelsCmd: MRenderer not found.");
         return MS::kFailure;
     }
 
-    // Enregistre l'override une seule fois
     if (s_override == nullptr)
     {
         auto* raw = new OffscreenRenderOverride(kOverrideName);
@@ -134,40 +93,30 @@ MStatus ReadPixelsCmd::doIt(const MArgList& argList)
         if (!status)
         {
             delete raw;
-            MGlobal::displayError("ReadPixelsCmd: registerOverride a echoue.");
+            MGlobal::displayError("ReadPixelsCmd: registerOverride failes.");
             return MS::kFailure;
         }
         s_override.reset(raw);
     }
 
-    // Récupère les pixels du dernier rendu
+    // ToDo: Solve this issue
     CaptureOperation* captureOp = s_override->captureOp();
     if (captureOp == nullptr || !captureOp->ready)
     {
-        MGlobal::displayError("ReadPixelsCmd: pas de pixels — appelé refresh avant ?");
+        MGlobal::displayError("ReadPixelsCmd: no pixels — call refresh before ?");
         return MS::kFailure;
     }
 
     s_width  = captureOp->width;
     s_height = captureOp->height;
     s_buffer = std::move(captureOp->pixels);
-    captureOp->ready = false;  // Reset pour la prochaine frame
-
-    // Flip Y
-    const size_t rowBytes = static_cast<size_t>(s_width) * 4;
-    std::vector<uint8_t> tmp(rowBytes);
-    for (uint32_t y = 0; y < s_height / 2; ++y)
-    {
-        auto* top = s_buffer.data() + y              * rowBytes;
-        auto* bot = s_buffer.data() + (s_height-1-y) * rowBytes;
-        std::memcpy(tmp.data(), top,        rowBytes);
-        std::memcpy(top,        bot,        rowBytes);
-        std::memcpy(bot,        tmp.data(), rowBytes);
-    }
+    captureOp->ready = false;
 
     const std::string ptrStr = std::to_string(
         reinterpret_cast<uintptr_t>(s_buffer.data())
     );
+
     setResult(MString(ptrStr.c_str()));
+
     return MS::kSuccess;
 }

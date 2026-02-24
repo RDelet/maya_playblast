@@ -20,6 +20,16 @@ maya_playblast.install_dependencies()
 
 ```python
 from maya_playblast.ui import main
+
+"""
+# Use this code if you compile plugin
+from maya import cmds
+
+plugin_path = r"D:\Work\GitHub\maya_playblast\plugins\Release\PlayblastReadPixels.mll"
+if not cmds.pluginInfo(plugin_path, query=True, loaded=True):
+    cmds.loadPlugin(plugin_path)
+"""
+
 main.PlayblastDialog().show()
 ```
 
@@ -33,11 +43,15 @@ build.bat 2022 "MAYA_SDK_PATH" "OUTPUT_DIR"
 # Check custom capture commande
 
 ```python
+from __future__ import annotations
+
 import ctypes
 import numpy as np
 from PIL import Image
 
-from maya import OpenMayaUI as omui
+from maya import cmds, OpenMayaUI as omui
+
+from maya_playblast.capture.context import VP2Override
 
 plugin_path = r"D:\Work\GitHub\maya_playblast\plugins\Release\PlayblastReadPixels.mll"
 if not cmds.pluginInfo(plugin_path, query=True, loaded=True):
@@ -47,11 +61,19 @@ view   = omui.M3dView.active3dView()
 width  = view.portWidth()
 height = view.portHeight()
 
-ptr_str = cmds.readPixels()
+# Force first capture. But why ?...
+try:
+    cmds.readPixels()
+except :
+    pass
+
+with VP2Override(view):
+    ptr_str = cmds.readPixels()
+
 ptr = int(ptr_str)
 c_array = (ctypes.c_uint8 * (width * height * 4)).from_address(ptr)
-array = np.ctypeslib.as_array(c_array).reshape((height, width, 4)).copy()
+array = np.ctypeslib.as_array(c_array).reshape((height, width, 4)).copy()[::-1]
 
-output_path = r"D:\output.jng"
+output_path = r"D:\output.png"
 Image.fromarray(array, mode="RGBA").save(output_path)
 ```

@@ -5,10 +5,11 @@ from threading import Thread
 
 from maya import cmds, OpenMayaUI as omui
 
-from ..io import launchers
-from ..capture.config import CaptureConfig, ViewConfig
 from ..core.logger import log
+from ..core import constants
+from ..io import launchers
 from ..maya import maya_ui, viewport
+from ..capture.config import CaptureConfig, ViewConfig
 
 
 @contextmanager
@@ -66,3 +67,15 @@ def ImageToVideo(config_cfg: CaptureConfig, view_cfg: ViewConfig):
         except Exception as e:
             log.error("FFmpeg did not terminate in time, killing process.")
             proc.kill()
+
+
+@contextmanager
+def VP2Override(view: omui.M3dView):
+    panel = maya_ui.get_editor_from_view(view)
+    try:
+        cmds.modelEditor(panel, edit=True, rendererOverrideName=constants.OVERRIDE_NAME)
+        cmds.refresh(force=True)
+        cmds.modelEditor(panel, edit=True, rendererOverrideName="")
+        yield
+    finally:
+        pass

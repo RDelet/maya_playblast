@@ -1,37 +1,105 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# ==========================================================
+#  Maya Plugin Build Script
+# ==========================================================
+
+set -e  # Stop on first error
+
+# ----------------------------------------------------------
+# Usage
+# ----------------------------------------------------------
 
 if [ -z "$1" ]; then
-    echo "Usage : build.sh MAYA_VERSION [DEVKIT_DIR] [OUTPUT_DIR]"
+    echo
+    echo "Usage: ./build.sh MAYA_VERSION [OUTPUT_DIR] [MAYA_DEVKIT_DIR]"
+    echo
+    echo "Example:"
+    echo "    ./build.sh 2024"
+    echo "    ./build.sh 2024 /home/user/plugins"
+    echo "    ./build.sh 2024 /home/user/plugins /usr/autodesk/maya2024/devkit"
+    echo
     exit 1
 fi
 
 MAYA_VERSION="$1"
-DEVKIT_DIR="$2"
-OUTPUT_DIR="$3"
+OUTPUT_DIR="$2"
+DEVKIT_DIR="$3"
 
-# Se place dans le dossier du script
-cd "$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
-mkdir -p build
+echo
+echo "=========================================================="
+echo "  Building Maya Plugin"
+echo "=========================================================="
+echo "  Maya Version : $MAYA_VERSION"
 
-if [ -z "$DEVKIT_DIR" ]; then
-    cmake . -B build -DMAYA_VERSION="$MAYA_VERSION"
-elif [ -z "$OUTPUT_DIR" ]; then
-    cmake . -B build -DMAYA_VERSION="$MAYA_VERSION" -DMAYA_DEVKIT_DIR="$DEVKIT_DIR"
-else
-    cmake . -B build -DMAYA_VERSION="$MAYA_VERSION" -DMAYA_DEVKIT_DIR="$DEVKIT_DIR" -DPLUGIN_OUTPUT_DIR="$OUTPUT_DIR"
+if [ -n "$OUTPUT_DIR" ]; then
+    echo "  Output Dir   : $OUTPUT_DIR"
 fi
 
-if [ $? -ne 0 ]; then
-    echo "[ERREUR] CMake configure a echoue."
+if [ -n "$DEVKIT_DIR" ]; then
+    echo "  DevKit Dir   : $DEVKIT_DIR"
+fi
+
+echo "=========================================================="
+echo
+
+# ----------------------------------------------------------
+# Validate DevKit
+# ----------------------------------------------------------
+
+if [ -n "$DEVKIT_DIR" ] && [ ! -d "$DEVKIT_DIR" ]; then
+    echo "[ERROR] Provided MAYA_DEVKIT_DIR does not exist:"
+    echo "        $DEVKIT_DIR"
     exit 1
 fi
 
-cmake --build build --parallel $(nproc 2>/dev/null || sysctl -n hw.ncpu)
-if [ $? -ne 0 ]; then
-    echo "[ERREUR] Build a echoue."
-    exit 1
+# ----------------------------------------------------------
+# Create build directory
+# ----------------------------------------------------------
+
+if [ ! -d "build" ]; then
+    echo "Creating build directory..."
+    mkdir build
 fi
 
-echo ""
-echo " [OK] Build termine — build/PlayblastReadPixels.so"
+# ----------------------------------------------------------
+# Configure with CMake
+# ----------------------------------------------------------
+
+echo
+echo "Configuring project with CMake..."
+echo
+
+CMAKE_ARGS=(-DMAYA_VERSION="$MAYA_VERSION")
+
+if [ -n "$OUTPUT_DIR" ]; then
+    CMAKE_ARGS+=(-DPLUGIN_OUTPUT_DIR="$OUTPUT_DIR")
+fi
+
+if [ -n "$DEVKIT_DIR" ]; then
+    CMAKE_ARGS+=(-DMAYA_DEVKIT_DIR="$DEVKIT_DIR")
+fi
+
+cmake -S . -B build "${CMAKE_ARGS[@]}"
+
+echo
+echo "Building Release configuration..."
+echo
+
+cmake --build build --config Release
+
+# ----------------------------------------------------------
+# Success
+# ----------------------------------------------------------
+
+echo
+echo "=========================================================="
+echo "[SUCCESS] Plugin successfully built!"
+echo
+echo "Output:"
+echo "  build/Release/PlayblastReadPixels.so"
+echo "=========================================================="
+echo

@@ -6,6 +6,8 @@ SETTINGS_PATH = ROOT_PATH / "settings.ini"
 CLOSE_ICON_PATH = ROOT_PATH / "icons" / "close.svg"
 SETTINGS_ICON_PATH = ROOT_PATH / "icons" / "settings.svg"
 
+OVERRIDE_NAME = "PlayblastOffscreenOverride"
+
 
 MUXERS = [('mp4', 'MP4 (MPEG-4 Part 14)'),
           ('mov', 'QuickTime / MOV'),

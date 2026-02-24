@@ -16,21 +16,20 @@ static const char* kCameraFlagLong = "-camera";
 
 class ReadPixelsCmd : public MPxCommand
 {
-public:
-    ReadPixelsCmd()  = default;
-    ~ReadPixelsCmd() override = default;
+    public:
+        ReadPixelsCmd()  = default;
+        ~ReadPixelsCmd() override = default;
 
-    MStatus doIt(const MArgList& args) override;
+        MStatus doIt(const MArgList& args) override;
 
-    static void*   creator();
-    static MSyntax newSyntax();
+        static void*   creator();
+        static MSyntax newSyntax();
 
-    static const char* kCommandName;
+        static const char* kCommandName;
 
-    static std::vector<uint8_t> s_buffer;
-    static uint32_t             s_width;
-    static uint32_t             s_height;
+        static std::vector<uint8_t> s_buffer;
+        static uint32_t             s_width;
+        static uint32_t             s_height;
 
-    // Appelé depuis uninitializePlugin — détruit le override proprement
-    static void cleanup();
+        static void cleanup();
 };

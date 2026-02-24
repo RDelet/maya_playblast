@@ -122,6 +122,8 @@ class Settings:
         flags = {}
         for flag in VIEWPORT_FLAGS:
             val = self._setting.value(f"viewport_flags/{flag.name}", None)
+            if not val:
+                continue
             flags[flag.name] = val.lower() == "true"
 
         return flags

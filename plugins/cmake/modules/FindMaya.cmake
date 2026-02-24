@@ -1,24 +1,24 @@
 # FindMaya.cmake
-# Localise le Maya Devkit et définit les targets nécessaires
-# pour compiler un plugin Maya.
+# Locates the Maya Devkit and defines the required targets
+# to build a Maya plugin.
 #
-# Variables d'entrée (à définir avant find_package) :
-#   MAYA_VERSION       — Année Maya (ex: 2024, 2025)
-#   MAYA_DEVKIT_DIR    — Chemin vers le devkit (optionnel, auto-détecté sinon)
+# Input variables (to define before find_package):
+#   MAYA_VERSION       — Maya year (e.g: 2024, 2025)
+#   MAYA_DEVKIT_DIR    — Path to the devkit (optional, auto-detected otherwise)
 #
-# Variables de sortie :
+# Output variables:
 #   Maya_FOUND
 #   Maya_INCLUDE_DIRS
 #   Maya_LIBRARY_DIRS
 #   Maya_LIBRARIES
 #   Maya_VERSION
 #
-# Target importé :
+# Imported target:
 #   Maya::Maya
 
 cmake_minimum_required(VERSION 3.13)
 
-# ─── Chemins par défaut selon la plateforme ───────────────────────────────────
+# ─── Default platform-specific paths ─────────────────────────────────────────
 if(NOT MAYA_VERSION)
     set(MAYA_VERSION "2025" CACHE STRING "Maya version year")
 endif()
@@ -39,36 +39,36 @@ endif()
 message(STATUS "=== FindMaya Debug ===")
 message(STATUS "MAYA_DEVKIT_DIR : ${MAYA_DEVKIT_DIR}")
 
-# Vérifie si le dossier existe
+# Check if directory exists
 if(EXISTS "${MAYA_DEVKIT_DIR}")
-    message(STATUS "Dossier Maya EXISTS")
+    message(STATUS "Maya directory EXISTS")
 else()
-    message(STATUS "ERREUR : Dossier Maya INTROUVABLE")
+    message(STATUS "ERROR: Maya directory NOT FOUND")
 endif()
 
-# Vérifie le dossier include
+# Check include folder
 if(EXISTS "${MAYA_DEVKIT_DIR}/include")
     message(STATUS "include/ EXISTS")
 else()
-    message(STATUS "ERREUR : include/ INTROUVABLE")
+    message(STATUS "ERROR: include/ NOT FOUND")
 endif()
 
-# Vérifie MFnPlugin.h spécifiquement
+# Specifically check MFnPlugin.h
 if(EXISTS "${MAYA_DEVKIT_DIR}/include/maya/MFnPlugin.h")
     message(STATUS "MFnPlugin.h EXISTS")
 else()
-    message(STATUS "ERREUR : MFnPlugin.h INTROUVABLE")
+    message(STATUS "ERROR: MFnPlugin.h NOT FOUND")
 endif()
 
-# Vérifie le dossier lib
+# Check lib folder
 if(EXISTS "${MAYA_DEVKIT_DIR}/lib")
     message(STATUS "lib/ EXISTS")
     file(GLOB _MAYA_LIBS_FOUND "${MAYA_DEVKIT_DIR}/lib/*.lib")
     foreach(_f ${_MAYA_LIBS_FOUND})
-        message(STATUS "  lib trouvée : ${_f}")
+        message(STATUS "  library found : ${_f}")
     endforeach()
 else()
-    message(STATUS "ERREUR : lib/ INTROUVABLE")
+    message(STATUS "ERROR: lib/ NOT FOUND")
 endif()
 message(STATUS "=== FindMaya Debug End ===")
 
@@ -114,14 +114,14 @@ find_package_handle_standard_args(Maya
     VERSION_VAR   MAYA_VERSION
 )
 
-# ─── Target importé Maya::Maya ───────────────────────────────────────────────
+# ─── Imported target Maya::Maya ──────────────────────────────────────────────
 if(Maya_FOUND AND NOT TARGET Maya::Maya)
     add_library(Maya::Maya INTERFACE IMPORTED)
     target_include_directories(Maya::Maya INTERFACE "${Maya_INCLUDE_DIRS}")
     target_link_directories(Maya::Maya INTERFACE "${Maya_LIBRARY_DIRS}")
     target_link_libraries(Maya::Maya INTERFACE ${Maya_LIBRARIES})
 
-    # Flags nécessaires pour les plugins Maya
+    # Required definitions for Maya plugins
     target_compile_definitions(Maya::Maya INTERFACE
         REQUIRE_IOSTREAM
         _BOOL
@@ -130,7 +130,7 @@ if(Maya_FOUND AND NOT TARGET Maya::Maya)
         $<$<PLATFORM_ID:Linux>:LINUX LINUX_64>
     )
 
-    # Flags de compilation
+    # Compile flags
     if(WIN32)
         target_compile_options(Maya::Maya INTERFACE /EHsc)
     else()
