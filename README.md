@@ -20,24 +20,19 @@ maya_playblast.install_dependencies()
 
 ```python
 from maya_playblast.ui import main
-
-"""
-# Use this code if you compile plugin
-from maya import cmds
-
-plugin_path = r"D:\Work\GitHub\maya_playblast\plugins\Release\PlayblastReadPixels.mll"
-if not cmds.pluginInfo(plugin_path, query=True, loaded=True):
-    cmds.loadPlugin(plugin_path)
-"""
-
 main.PlayblastDialog().show()
 ```
 
 # Build Plugins
 
+With:
+- ../ThirdParty/Maya_SDKs/2022
+- ../ThirdParty/Maya_SDKs/2023
+- ...
+
 ```
 cd ../maya_playblast/plugin
-build.bat 2022 "MAYA_SDK_PATH" "OUTPUT_DIR"
+build_all_maya.bat "../ThirdParty/Maya_SDKs" "../maya_playblast/plugin"
 ```
 
 # Check custom capture commande
@@ -49,15 +44,12 @@ import ctypes
 import numpy as np
 from PIL import Image
 
-from maya import cmds, OpenMayaUI as omui
+from maya import cmds
 
 from maya_playblast.capture.context import VP2Override
+from maya_playblast.maya import maya_ui
 
-plugin_path = r"D:\Work\GitHub\maya_playblast\plugins\Release\PlayblastReadPixels.mll"
-if not cmds.pluginInfo(plugin_path, query=True, loaded=True):
-    cmds.loadPlugin(plugin_path)
-
-view   = omui.M3dView.active3dView()
+view   = maya_ui.get_active_view()
 width  = view.portWidth()
 height = view.portHeight()
 

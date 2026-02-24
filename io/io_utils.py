@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 from pathlib import Path
+import platform
 import shutil
 import subprocess
 import sys
 from importlib import import_module
 
 from ..core.logger import log
+
+
+def get_platform() -> str | None:
+    return platform.system().lower()
 
 
 def increment_file_path(path: str | Path) -> Path:

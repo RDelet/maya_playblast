@@ -1,8 +1,13 @@
 from maya import cmds, OpenMaya as om
 
 
+def get_version() -> str:
+    return cmds.about(version=True)
+
+
 def create_image() -> om.MImage:
     return om.MImage()
+
 
 def current_time(current) -> int:
     return cmds.currentTime(current)

@@ -1,49 +1,46 @@
 @echo off
-setlocal EnableExtensions EnableDelayedExpansion
+setlocal EnableExtensions
 
 REM ==========================================================
-REM  Maya Plugin Build Script
+REM Maya Plugin Build Script (Fixed for paths with spaces)
 REM ==========================================================
 
 if "%~1"=="" (
     echo.
-    echo Usage: build.bat MAYA_VERSION [OUTPUT_DIR] [MAYA_DEVKIT_DIR]
+    echo Usage: build.bat MAYA_VERSION [MAYA_DEVKIT_DIR] [BASE_OUTPUT_DIR]
     echo.
     echo Example:
-    echo     build.bat 2024
-    echo     build.bat 2024 "C:\MyPlugins"
-    echo     build.bat 2024 "C:\MyPlugins" "C:\Autodesk\Maya2024\devkit"
+    echo     build.bat 2024 "DekKit Directory" ".\maya_playblast\plugins"
     echo.
     exit /b 1
 )
 
-set MAYA_VERSION=%~1
-set DEVKIT_DIR=%~2
-set OUTPUT_DIR=%~3
+set "MAYA_VERSION=%~1"
+set "DEVKIT_DIR=%~2"
+set "BASE_OUTPUT_DIR=%~3"
 
-cd /d "%~dp0"
+REM ----------------------------------------------------------
+REM If a base output directory is provided, append win\maya{Year}
+REM ----------------------------------------------------------
+if not "%BASE_OUTPUT_DIR%"=="" (
+    set "OUTPUT_DIR=%BASE_OUTPUT_DIR%\windows\maya%MAYA_VERSION%"
+) else (
+    set "OUTPUT_DIR="
+)
 
 echo.
 echo ==========================================================
 echo   Building Maya Plugin
 echo ==========================================================
-echo   Maya Version  : %MAYA_VERSION%
-
-if not "%OUTPUT_DIR%"=="" (
-    echo   Output Dir    : %OUTPUT_DIR%
-)
-
-if not "%DEVKIT_DIR%"=="" (
-    echo   DevKit Dir    : %DEVKIT_DIR%
-)
-
+echo   Maya Version    : %MAYA_VERSION%
+echo   DevKit Directory: %DEVKIT_DIR%
+echo   Output Directory: %OUTPUT_DIR%
 echo ==========================================================
 echo.
 
 REM ----------------------------------------------------------
 REM Validate DevKit directory if provided
 REM ----------------------------------------------------------
-
 if not "%DEVKIT_DIR%"=="" (
     if not exist "%DEVKIT_DIR%" (
         echo [ERROR] Provided MAYA_DEVKIT_DIR does not exist:
@@ -55,7 +52,6 @@ if not "%DEVKIT_DIR%"=="" (
 REM ----------------------------------------------------------
 REM Create build directory
 REM ----------------------------------------------------------
-
 if not exist build (
     echo Creating build directory...
     mkdir build
@@ -63,31 +59,18 @@ if not exist build (
 
 REM ----------------------------------------------------------
 REM Configure with CMake
+REM Use quotes around paths to handle spaces
 REM ----------------------------------------------------------
-
 echo.
 echo Configuring project with CMake...
 echo.
 
-if "%OUTPUT_DIR%"=="" (
-    cmake . -B build ^
-        -DMAYA_VERSION=%MAYA_VERSION% ^
-        -G "Visual Studio 17 2022" ^
-        -A x64
-) else if "%DEVKIT_DIR%"=="" (
-    cmake . -B build ^
-        -DMAYA_VERSION=%MAYA_VERSION% ^
-        -DPLUGIN_OUTPUT_DIR="%OUTPUT_DIR%" ^
-        -G "Visual Studio 17 2022" ^
-        -A x64
-) else (
-    cmake . -B build ^
-        -DMAYA_VERSION=%MAYA_VERSION% ^
-        -DPLUGIN_OUTPUT_DIR="%OUTPUT_DIR%" ^
-        -DMAYA_DEVKIT_DIR="%DEVKIT_DIR%" ^
-        -G "Visual Studio 17 2022" ^
-        -A x64
-)
+cmake . -B build ^
+    -DMAYA_VERSION="%MAYA_VERSION%" ^
+    -DPLUGIN_OUTPUT_DIR="%OUTPUT_DIR%" ^
+    -DMAYA_DEVKIT_DIR="%DEVKIT_DIR%" ^
+    -G "Visual Studio 17 2022" ^
+    -A x64
 
 if errorlevel 1 (
     echo.
@@ -98,7 +81,6 @@ if errorlevel 1 (
 REM ----------------------------------------------------------
 REM Build
 REM ----------------------------------------------------------
-
 echo.
 echo Building Release configuration...
 echo.
@@ -114,7 +96,6 @@ if errorlevel 1 (
 REM ----------------------------------------------------------
 REM Success
 REM ----------------------------------------------------------
-
 echo.
 echo ==========================================================
 echo [SUCCESS] Plugin successfully built!

@@ -10,10 +10,10 @@ MStatus initializePlugin(MObject obj)
 
     const MStatus status = plugin.registerCommand(ReadPixelsCmd::kCommandName, ReadPixelsCmd::creator, ReadPixelsCmd::newSyntax);
 
-    if (status)
-        MGlobal::displayInfo("PlayblastReadPixels v2 charge.");
-    else
+    if (!status)
+    {
         MGlobal::displayError("Erreur registerCommand : " + status.errorString());
+    }
 
     return status;
 }
