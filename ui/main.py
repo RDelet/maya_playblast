@@ -68,11 +68,12 @@ class PlayblastDialog(FramelessWindow):
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool)
         self.set_header_title(self.WINDOW_TITLE)
 
+        Settings.sync = False
         self._drag_pos = None
         self._settings = Settings()
-
         self._build_ui()
         self.setStyleSheet(self.STYLE)
+        Settings.sync = True
     
     def closeEvent(self, event):
         self._save_settings()
@@ -83,11 +84,7 @@ class PlayblastDialog(FramelessWindow):
 
         self._main_layout.addWidget(Separator("", parent=self))
 
-        self._path_selector = SaveFileWidget("Output Path", extension=MUXERS[0][0], parent=self)
-        if self._settings.output_path:
-            self._path_selector.set_path(self._settings.output_path)
-        self._main_layout.addWidget(self._path_selector)
-
+        self._build_output()
         self._build_encoding_group()
         self._build_visibility_group()
 
@@ -99,6 +96,16 @@ class PlayblastDialog(FramelessWindow):
         self._playblast_button.setFixedHeight(50)
         self._playblast_button.clicked.connect(self._on_playblast_clicked)
         self._main_layout.addWidget(self._playblast_button)
+    
+    def _build_output(self):
+        self._path_selector = SaveFileWidget("Output Path", extension=MUXERS[0][0], parent=self)
+        if self._settings.output_path:
+            self._path_selector.set_path(self._settings.output_path)
+        self._main_layout.addWidget(self._path_selector)
+
+        camera_items = [ComboBoxItem(x) for x in maya_utils.get_cameras()]
+        self._cameras = ComboBox("Cameras", camera_items)
+        self._main_layout.addWidget(self._cameras)
     
     def _build_header(self):
         setting_button = IconButton(SETTINGS_ICON_PATH,

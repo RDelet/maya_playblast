@@ -8,7 +8,7 @@ except:
 
 class ComboBoxItem:
 
-    def __init__(self, value: str, tooltip: str):
+    def __init__(self, value: str, tooltip: str | None = None):
         self.value = value
         self.tooltip = tooltip
 
@@ -53,7 +53,8 @@ class ComboBox(QtWidgets.QWidget):
         self._layout.addWidget(self._combo)
         for i, (item) in enumerate(items):
             self._combo.addItem(item.value)
-            self._combo.model().item(i).setToolTip(item.tooltip)
+            if item.tooltip:
+                self._combo.model().item(i).setToolTip(item.tooltip)
     
     def add_callback(self, callback: callable):
         self._combo.currentIndexChanged.connect(callback)

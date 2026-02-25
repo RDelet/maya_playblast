@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import List
+
 from maya import cmds, OpenMaya as om
 
 
@@ -23,3 +27,8 @@ def get_animation_start() -> int:
 
 def get_frame_rate() -> int:
     return int(om.MTime(1.0, om.MTime.kSeconds).asUnits(om.MTime.uiUnit()))
+
+
+def get_cameras() -> List[str]:
+    cameras = cmds.ls(type="camera", long=True)
+    return cmds.listRelatives(cameras, parent=True, fullPath=True)
