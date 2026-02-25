@@ -5,6 +5,7 @@ try:
 except:
     from PySide6 import QtCore, QtWidgets
 
+from ..core import constants
 from ..core.settings import Settings
 
 
@@ -12,7 +13,7 @@ class GroupWidget(QtWidgets.QWidget):
 
     kBaseHeaderColor = "#DC6400"
     toggled = QtCore.Signal(bool)
-    clicked = QtCore.Signal()
+    _clicked = QtCore.Signal()
 
     STYLE = """
         GroupWidget QFrame#HeaderWidget {{
@@ -32,9 +33,7 @@ class GroupWidget(QtWidgets.QWidget):
         super().__init__(parent)
 
         self._title = title
-
-        if self._title is not None:
-            expanded = Settings().get_group_expanded(self._title, default=expanded)
+        self._expanded = Settings().get_group_expanded(self._title, default=expanded)
 
         self._layout = QtWidgets.QVBoxLayout(self)
         self._layout.setContentsMargins(2, 2, 2, 2)
@@ -47,11 +46,11 @@ class GroupWidget(QtWidgets.QWidget):
         self.set_expanded(expanded)
         
         if not only_button:
-            self.clicked.connect(self.__on_expand_clicked)
+            self._clicked.connect(self.__on_expand_clicked)
     
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
-        self.clicked.emit() 
+        self._clicked.emit() 
 
     def _init_header(self, title: str):
         self._header = QtWidgets.QFrame()
@@ -65,9 +64,9 @@ class GroupWidget(QtWidgets.QWidget):
         self._header_layout.setAlignment(QtCore.Qt.AlignLeft)
 
         self._expand = QtWidgets.QToolButton()
+        self._expand.clicked.connect(self.__on_expand_clicked)
         self._expand.setArrowType(QtCore.Qt.RightArrow)
         self._expand.setStyleSheet("QToolButton { border: none; }")
-        self._expand.clicked.connect(self.__on_expand_clicked)
         self._header_layout.addWidget(self._expand)
 
         self._title_label = QtWidgets.QLabel(title)
