@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Dict
 from pathlib import Path
 
 try:
@@ -132,6 +133,16 @@ class Settings:
     def viewport_flags(self, flags: dict[str, bool]):
         for name, value in flags.items():
             self._setting.setValue(f"viewport_flags/{name}", str(value))
+    
+    def get_group_expanded(self, key: str, default: bool = True) -> bool:
+        val = self._setting.value(f"ui/groups/{key}", None)
+        if val is None:
+            return default
+        return val.lower() == "true" if isinstance(val, str) else bool(val)
+
+    def set_group_expanded(self, key: str, expanded: bool):
+        self._setting.setValue(f"ui/groups/{key}", str(expanded))
+        self.save()
 
     def save(self):
         self._setting.sync()

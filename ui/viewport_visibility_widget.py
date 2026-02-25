@@ -9,9 +9,26 @@ except:
 
 from ..capture.config import ViewConfig
 from ..maya import maya_ui
-from ..maya.viewport import set_viewport_state, VIEWPORT_FLAGS
+from ..maya import viewport
 
 
+class Checkbox(QtWidgets.QCheckBox):
+    
+    def __init__(self, flag: viewport.ViewportFlag, parent: QtWidgets.QWidget | None = None):
+        super().__init__(flag.name, parent)
+        self._flag = flag
+        # self.stateChanged.connect(self._on_state_changed)
+    
+    @property
+    def flag(self) -> viewport.ViewportFlag:
+        return self._flag
+    
+    def _on_state_changed(self, state: bool):
+        self._flag.value = state
+        for panel in maya_ui.get_panels():
+            viewport.set_viewport_state(panel, self._flag)
+
+    
 class ViewportVisibilityWidget(QtWidgets.QWidget):
 
     STYLE = """
@@ -76,12 +93,13 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
         grid_layout.setContentsMargins(0, 0, 0, 0)
         self._layout.addLayout(grid_layout)
 
-        for idx, flag in enumerate(VIEWPORT_FLAGS):
-            widget = QtWidgets.QCheckBox(flag.name)
+        for idx, flag in enumerate(viewport.VIEWPORT_FLAGS):
+            widget = Checkbox(flag)
             if viewport_flags and flag.name in viewport_flags:
                 widget.setChecked(viewport_flags[flag.name])
             else:
                 widget.setChecked(flag.keep_visible)
+
             self._flag_checkboxes[flag.name] = widget
             grid_layout.addWidget(widget, idx // columns, idx % columns)
     
@@ -92,11 +110,13 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
         all_button = QtWidgets.QPushButton("All On")
         none_button = QtWidgets.QPushButton("All Off")
         reset_button = QtWidgets.QPushButton("Defaults")
-        for btn in (all_button, none_button, reset_button):
+        viewport_button = QtWidgets.QPushButton("Viewport")
+        for btn in (all_button, none_button, reset_button, viewport_button):
             toggle_button.addWidget(btn)
 
         all_button.clicked.connect(partial(self._set_all_flags, True))
         none_button.clicked.connect(partial(self._set_all_flags, False))
+        viewport_button.clicked.connect(self._set_viewport_flags)
         reset_button.clicked.connect(self._reset_flags)
 
         apply_button = QtWidgets.QPushButton("Apply")
@@ -106,14 +126,19 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
     def _apply(self):
         view_config = self.config
         name = maya_ui.get_editor_from_view(view_config.view)
-        set_viewport_state(name, view_config.flags)
+        viewport.set_viewport_states(name, view_config.flags)
 
     def _set_all_flags(self, value: bool):
         for chk in self._flag_checkboxes.values():
             chk.setChecked(value)
     
+    def _set_viewport_flags(self):
+        panel = self.config.panel
+        for chk in self._flag_checkboxes.values():
+            chk.setChecked(chk.flag.viewport_state(panel))
+    
     def _reset_flags(self):
-        for flag in VIEWPORT_FLAGS:
+        for flag in viewport.VIEWPORT_FLAGS:
             if flag.name in self._flag_checkboxes:
                 self._flag_checkboxes[flag.name].setChecked(flag.keep_visible)
     

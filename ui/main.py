@@ -110,6 +110,10 @@ class PlayblastDialog(FramelessWindow):
                                   size=30, icon_size=18, parent=self)
         close_button.clicked.connect(self.close)
         self.add_header_widget(close_button)
+    
+    
+    def _get_expanded_from_settings(self, name: str) -> bool:
+        return self._settings.get()
 
 
     def _build_encoding_group(self):

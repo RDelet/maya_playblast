@@ -62,3 +62,7 @@ class ViewConfig:
     @classmethod
     def from_active(cls) -> ViewConfig:
         return cls(view=maya_ui.get_active_view())
+    
+    @property
+    def panel(self) -> str:
+        return maya_ui.get_editor_from_view(self.view)

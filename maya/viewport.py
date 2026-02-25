@@ -6,6 +6,7 @@ from typing import Dict, List
 from maya import cmds
 
 from ..core.logger import log
+from ..maya import maya_ui
 
 
 @dataclass
@@ -17,6 +18,17 @@ class ViewportFlag:
     @property
     def as_dict(self) -> Dict[str, bool]:
         return {self.name: self.value}
+    
+    def viewport_state(self, panel: str) -> bool:
+        return cmds.modelEditor(panel, query=True, **{self.name: True})
+
+    def viewport_states(self) -> Dict[str, bool]:
+        output = {}
+        for panel in maya_ui.get_panels():
+            output[panel] = self.viewport_state(panel)
+    
+    def set_from_viewport(self, panel: str):
+        self.value = self.viewport_state(panel)
 
 
 @dataclass
@@ -53,8 +65,7 @@ class ViewportFlags:
         result = []
         for flag in self.flags:
             try:
-                current = cmds.modelEditor(panel, query=True, **{flag.name: True})
-                result.append(ViewportFlag(flag.name, current, flag.keep_visible))
+                result.append(ViewportFlag(flag.name, flag.viewport_state(panel), flag.keep_visible))
             except Exception as e:
                 log.error(f"Error getting state of {flag.name} !", e)
 
@@ -101,9 +112,13 @@ VIEWPORT_FLAGS = ViewportFlags(flags=[
 ])
 
 
-def set_viewport_state(panel: str, states: List[ViewportFlag] | ViewportFlags):
+def set_viewport_state(panel: str, state: ViewportFlag):
+    try:
+        cmds.modelEditor(panel, edit=True, **state.as_dict)
+    except Exception as e:
+        log.error(f"Error on set flag {state.name} !\n\t{e}")
+
+
+def set_viewport_states(panel: str, states: List[ViewportFlag] | ViewportFlags):
     for state in states:
-        try:
-            cmds.modelEditor(panel, edit=True, **state.as_dict)
-        except Exception as e:
-            log.error(f"Error on set flag {state.name} !\n\t{e}")
+        set_viewport_states(panel, state)

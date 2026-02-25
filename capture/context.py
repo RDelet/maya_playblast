@@ -22,9 +22,9 @@ def SetEditorFlag(view_cfg: ViewConfig):
 
     states = viewport.VIEWPORT_FLAGS.snapshot(name)
     try:
-        yield viewport.set_viewport_state(name, view_cfg.flags)
+        yield viewport.set_viewport_states(name, view_cfg.flags)
     finally:
-        viewport.set_viewport_state(name, states)
+        viewport.set_viewport_states(name, states)
 
 
 @contextmanager

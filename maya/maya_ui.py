@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import List
 
 try:
     from PySide2 import QtWidgets
@@ -37,6 +38,10 @@ def create_panel(width: int, height: int) -> PanelWidget:
     return widget
 
 
+def get_panels() -> List[str]:
+    return cmds.getPanel(type="modelPanel")
+
+
 def delete_panel(widget: QtWidgets.QWidget):
     panel_name = widget.panel.objectName()
     cmds.deleteUI(widget.objectName(), window=True)
@@ -73,7 +78,7 @@ def get_active_editor() -> str | None:
 def get_editor_from_view(view: omui.M3dView) -> str | None:
     # Get panel pointers
     panel_ptrs = {}
-    for panel in cmds.getPanel(type="modelPanel"):
+    for panel in get_panels():
         editor = cmds.modelPanel(panel, query=True, modelEditor=True)
         editor_ptr = omui.MQtUtil.findControl(editor)
         if editor_ptr:
