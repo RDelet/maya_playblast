@@ -17,12 +17,12 @@ from ..capture.config import CaptureConfig
 from ..capture.frame_capture import FrameCapture
 from ..ui.frameless_window import FramelessWindow
 from ..ui.combobox import ComboBox, ComboBoxItem
-from ..ui.group_widget import GroupWidget
+from .group import Group
 from ..ui.icon_button import IconButton
 from ..ui.path_selector import SaveFileWidget
 from ..ui.viewport_visibility_widget import ViewportVisibilityWidget
 from ..ui.settings_widget import SettingsWidget
-from ..ui.spinbox import SpinBox
+from .slider_spinbox import SliderSpinBox
 from ..ui.separator import Separator
 
 
@@ -68,12 +68,11 @@ class PlayblastDialog(FramelessWindow):
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool)
         self.set_header_title(self.WINDOW_TITLE)
 
-        Settings.sync = False
         self._drag_pos = None
         self._settings = Settings()
+        
         self._build_ui()
         self.setStyleSheet(self.STYLE)
-        Settings.sync = True
     
     def closeEvent(self, event):
         self._save_settings()
@@ -99,8 +98,6 @@ class PlayblastDialog(FramelessWindow):
     
     def _build_output(self):
         self._path_selector = SaveFileWidget("Output Path", extension=MUXERS[0][0], parent=self)
-        if self._settings.output_path:
-            self._path_selector.set_path(self._settings.output_path)
         self._main_layout.addWidget(self._path_selector)
 
         camera_items = [ComboBoxItem(x) for x in maya_utils.get_cameras()]
@@ -117,42 +114,31 @@ class PlayblastDialog(FramelessWindow):
                                   size=30, icon_size=18, parent=self)
         close_button.clicked.connect(self.close)
         self.add_header_widget(close_button)
-    
-    
-    def _get_expanded_from_settings(self, name: str) -> bool:
-        return self._settings.get()
-
 
     def _build_encoding_group(self):
 
-        self._encoding_widget = GroupWidget("Encoding", expanded=False, parent=self)
+        self._encoding_widget = Group("Encoding", expanded=False, parent=self)
         self._encoding_widget.toggled.connect(self._resize_window)
         self._main_layout.addWidget(self._encoding_widget)
 
         muser_items = [ComboBoxItem(x[0], x[1]) for x in MUXERS]
         self._muxers = ComboBox("Containers", muser_items)
         self._muxers.add_callback(self._on_muxer_changed)
-        if self._settings.muxer is not None:
-            self._muxers.current_index = int(self._settings.muxer)
         self._encoding_widget.add_widget(self._muxers)
 
         encoder_items = [ComboBoxItem(x[0], x[1]) for x in VIDEO_ENCODERS]
         self._encoders = ComboBox("Encoders", encoder_items)
-        if self._settings.encoder is not None:
-            self._encoders.current_index = int(self._settings.encoder)
         self._encoding_widget.add_widget(self._encoders)
 
-        self._crf_widget = SpinBox("CRF", range=(0, 51), default_value=24)
-        if self._settings.last_crf is not None:
-            self._crf_widget.value = int(self._settings.last_crf)
+        self._crf_widget = SliderSpinBox("CRF", range=(0, 51), default_value=24)
         self._encoding_widget.add_widget(self._crf_widget)
     
     def _build_visibility_group(self):
-        self._visibility_widget = GroupWidget("Visibility", expanded=False, parent=self)
+        self._visibility_widget = Group("Visibility", expanded=False, parent=self)
         self._visibility_widget.toggled.connect(self._resize_window)
         self._main_layout.addWidget(self._visibility_widget)
 
-        self._viewport_widget = ViewportVisibilityWidget(self, self._settings.viewport_flags)
+        self._viewport_widget = ViewportVisibilityWidget(self)
         self._visibility_widget.add_widget(self._viewport_widget)
     
     @property
@@ -194,17 +180,22 @@ class PlayblastDialog(FramelessWindow):
                                        end_frame=self.end_frame)
         view_config = self._viewport_widget.config
         capture = FrameCapture(capture_config, view_config)
-        if self._settings.player_path:
+        player_path = self._settings.get_player()
+        if player_path:
             capture.on_capture_complete.register(launchers.open_player)
         capture.run()
     
     def _save_settings(self):
-        self._settings.output_path = self.output_path
-        self._settings.muxer = self._muxers.current_index
-        self._settings.encoder = self._encoders.current_index
-        self._settings.last_crf = self._crf_widget.value
-        flags = self._viewport_widget.flag_widgets
-        self._settings.viewport_flags = {name: x.isChecked() for name, x in flags.items()}
+        self._path_selector.save_settings()
+        self._cameras.save_settings()
+
+        self._encoding_widget.save_settings()
+        self._muxers.save_settings()
+        self._encoders.save_settings()
+        self._crf_widget.save_settings()
+
+        self._visibility_widget.save_settings()
+        self._viewport_widget.save_settings()
         self._settings.save()
 
     def _resize_window(self, *args):

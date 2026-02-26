@@ -34,34 +34,39 @@ class SettingsWidget(FramelessWindow):
 
         self._build_ui()
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        self.restore_settings()
 
     def _build_ui(self):
         self._build_header()
         self._main_layout.addWidget(Separator("", parent=self))
 
         self._ffmpeg_selector = FileSelector("FFmpeg Path", "exe", parent=self)
-        self._ffmpeg_selector.FILE_SELECTED.connect(self._on_ffmpeg_selected)
-        if self._settings.ffmpeg_path:
-            self._ffmpeg_selector.set_path(self._settings.ffmpeg_path)
+        self._ffmpeg_selector.FILE_SELECTED.connect(self.save_settings)
         self._main_layout.addWidget(self._ffmpeg_selector)
 
         self._player_selector = FileSelector("Player Path", "exe", parent=self)
-        self._player_selector.FILE_SELECTED.connect(self._on_player_selected)
-        if self._settings.player_path:
-            self._player_selector.set_path(self._settings.player_path)
+        self._player_selector.FILE_SELECTED.connect(self.save_settings)
         self._main_layout.addWidget(self._player_selector)
     
     def _build_header(self):
-        close_button = IconButton(CLOSE_ICON_PATH,
-                                  size=30, icon_size=18, parent=self)
+        close_button = IconButton(CLOSE_ICON_PATH, size=30, icon_size=18, parent=self)
         close_button.clicked.connect(self.close)
         self.add_header_widget(close_button)
     
-    def _on_ffmpeg_selected(self, path: Path):
-        self._settings.ffmpeg_path = path
-        self._settings.save()
+    def restore_settings(self):
+        ffmpeg_path = self._settings.get_ffmpeg()
+        if ffmpeg_path:
+            self._ffmpeg_selector.set_path(ffmpeg_path)
+        
+        player_path = self._settings.get_ffmpeg()
+        if player_path:
+            self._player_selector.set_path(player_path)
+
+    def save_settings(self, *args) -> None:
+        self._settings.set(self._settings.FFMPEG_KEY, self._ffmpeg_selector.path)
+        self._settings.set(self._settings.PLAYER_KEY, self._player_selector.path)
     
-    def _on_player_selected(self, path: Path):
-        self._settings.player_path = path
-        self._settings.save()
+    @property
+    def _key_settings(self) -> str:
+        return f"ui/groups/{self._title}"
  

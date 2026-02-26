@@ -5,6 +5,8 @@ try:
 except:
     from PySide6 import QtWidgets
 
+from ..core.settings import Settings
+
 
 class ComboBoxItem:
 
@@ -40,6 +42,9 @@ class ComboBox(QtWidgets.QWidget):
                  parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
 
+        self._name = name
+        self._settings = Settings()
+
         self._layout = QtWidgets.QHBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
         self._layout.setSpacing(5)
@@ -48,22 +53,36 @@ class ComboBox(QtWidgets.QWidget):
         label.setFixedWidth(label_size)
         self._layout.addWidget(label)
 
-        self._combo = QtWidgets.QComboBox(self)
-        self._combo.setStyleSheet(self.STYLE)
-        self._layout.addWidget(self._combo)
+        self._combobox = QtWidgets.QComboBox(self)
         for i, (item) in enumerate(items):
-            self._combo.addItem(item.value)
+            self._combobox.addItem(item.value)
             if item.tooltip:
-                self._combo.model().item(i).setToolTip(item.tooltip)
+                self._combobox.model().item(i).setToolTip(item.tooltip)
+        self._layout.addWidget(self._combobox)
+
+        self._combobox.setStyleSheet(self.STYLE)
+        self.restore_settings()
     
     def add_callback(self, callback: callable):
-        self._combo.currentIndexChanged.connect(callback)
+        self._combobox.currentIndexChanged.connect(callback)
     
     @property
     def current_index(self) -> int:
-        return self._combo.currentIndex()
+        return self._combobox.currentIndex()
     
     @current_index.setter
     def current_index(self, index: int):
-        self._combo.setCurrentIndex(index)
+        self._combobox.setCurrentIndex(index)
+    
+    def restore_settings(self):
+        value = self._settings.get(self._key_settings)
+        if value:
+            self.current_index = int(value)
+
+    def save_settings(self) -> None:
+        self._settings.set(self._key_settings, self.current_index)
+    
+    @property
+    def _key_settings(self) -> str:
+        return f"ui/combobox/{self._name}"
 

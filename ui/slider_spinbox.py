@@ -5,11 +5,13 @@ try:
 except:
     from PySide6 import QtCore, QtWidgets
 
+from ..core.settings import Settings
 
-class SpinBox(QtWidgets.QWidget):
+
+class SliderSpinBox(QtWidgets.QWidget):
 
     STYLE = """
-        SpinBox QSpinBox {
+        SliderSpinBox QSpinBox {
             background: #1e1e1e;
             border: 1px solid #555;
             border-radius: 3px;
@@ -17,22 +19,22 @@ class SpinBox(QtWidgets.QWidget):
             color: #ddd;
             min-width: 40px;
         }
-        SpinBox QSpinBox:hover {
+        SliderSpinBox QSpinBox:hover {
             border-color: #e0a020;
         }
-        SpinBox QSpinBox::up-button {
+        SliderSpinBox QSpinBox::up-button {
             background: #2e2e2e;
             border: none;
             border-bottom: 1px solid #444;
             width: 16px;
         }
-        SpinBox QSpinBox::down-button {
+        SliderSpinBox QSpinBox::down-button {
             background: #2e2e2e;
             border: none;
             width: 16px;
         }
-        SpinBox QSpinBox::up-button:hover,
-        SpinBox QSpinBox::down-button:hover {
+        SliderSpinBox QSpinBox::up-button:hover,
+        SliderSpinBox QSpinBox::down-button:hover {
             background: #e0a020;
         }
     """
@@ -40,6 +42,9 @@ class SpinBox(QtWidgets.QWidget):
     def __init__(self, name: str, range: list | tuple = (0, 10), default_value: int = 5,
                  label_size: int = 80, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
+
+        self._name = name
+        self._settings = Settings()
 
         self._layout = QtWidgets.QHBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
@@ -84,6 +89,7 @@ class SpinBox(QtWidgets.QWidget):
         self._spinbox.valueChanged.connect(self._slider.setValue)
 
         self.setStyleSheet(self.STYLE)
+        self.restore_settings()
     
     @property
     def value(self) -> int:
@@ -94,3 +100,14 @@ class SpinBox(QtWidgets.QWidget):
         self._slider.setValue(value)
         self._spinbox.setValue(value)
     
+    def restore_settings(self):
+        value = self._settings.get(self._key_settings)
+        if value:
+            self.value = int(value)
+
+    def save_settings(self) -> None:
+        self._settings.set(self._key_settings, self.value)
+    
+    @property
+    def _key_settings(self) -> str:
+        return f"ui/slider_spin_box/{self._name}"

@@ -31,12 +31,13 @@ def open_player(path: str | Path):
 
 def ffmpeg_capture(config: CaptureConfig, view_cfg: ViewConfig):
     settings = Settings()
-    if not settings.ffmpeg_path:
+    ffmpeg_path = settings.get_ffmpeg()
+    if not ffmpeg_path:
         raise RuntimeError("FFmpeg path is not set. Please set it in the settings.")
-    if not settings.ffmpeg_path.exists():
-        raise RuntimeError(f"FFmpeg path {settings.ffmpeg_path} does not exist. Please check your settings.")
+    if not ffmpeg_path.exists():
+        raise RuntimeError(f"FFmpeg path {ffmpeg_path} does not exist. Please check your settings.")
 
-    proc_cmd = [str(settings.ffmpeg_path),
+    proc_cmd = [str(ffmpeg_path),
                 '-y',
                 '-f', 'rawvideo',
                 '-vcodec', 'rawvideo',

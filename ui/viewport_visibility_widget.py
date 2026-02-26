@@ -7,6 +7,7 @@ try:
 except:
     from PySide6 import QtWidgets
 
+from ..core.settings import Settings
 from ..capture.config import ViewConfig
 from ..maya import maya_ui
 from ..maya import viewport
@@ -17,7 +18,9 @@ class Checkbox(QtWidgets.QCheckBox):
     def __init__(self, flag: viewport.ViewportFlag, parent: QtWidgets.QWidget | None = None):
         super().__init__(flag.name, parent)
         self._flag = flag
+        self._settings = Settings()
         # self.stateChanged.connect(self._on_state_changed)
+        self.restore_settings()
     
     @property
     def flag(self) -> viewport.ViewportFlag:
@@ -27,6 +30,18 @@ class Checkbox(QtWidgets.QCheckBox):
         self._flag.value = state
         for panel in maya_ui.get_panels():
             viewport.set_viewport_state(panel, self._flag)
+    
+    def restore_settings(self):
+        value = self._settings.get(self._key_settings)
+        if value:
+            self.setChecked(value.lower() == "true")
+
+    def save_settings(self) -> None:
+        self._settings.set(self._key_settings, self.isChecked())
+    
+    @property
+    def _key_settings(self) -> str:
+        return f"viewport_flags/{self._flag.name}"
 
     
 class ViewportVisibilityWidget(QtWidgets.QWidget):
@@ -73,8 +88,7 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
         }
     """
 
-    def __init__(self, parent: QtWidgets.QWidget | None = None,
-                 viewport_flags: dict[str, bool] | None = None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
 
         self._flag_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
@@ -83,11 +97,11 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
         self._layout.setContentsMargins(0, 0, 0, 0)
         self._layout.setSpacing(2)
 
-        self._build_checkboxes(viewport_flags)
+        self._build_checkboxes()
         self._build_buttons()
         self.setStyleSheet(self.STYLE)
 
-    def _build_checkboxes(self, viewport_flags: dict[str, bool] | None = None, columns: int = 3):
+    def _build_checkboxes(self, columns: int = 3):
         grid_layout = QtWidgets.QGridLayout()
         grid_layout.setSpacing(2)
         grid_layout.setContentsMargins(0, 0, 0, 0)
@@ -95,11 +109,6 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
 
         for idx, flag in enumerate(viewport.VIEWPORT_FLAGS):
             widget = Checkbox(flag)
-            if viewport_flags and flag.name in viewport_flags:
-                widget.setChecked(viewport_flags[flag.name])
-            else:
-                widget.setChecked(flag.keep_visible)
-
             self._flag_checkboxes[flag.name] = widget
             grid_layout.addWidget(widget, idx // columns, idx % columns)
     
@@ -153,3 +162,7 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
     @property
     def flag_widgets(self) -> dict[str, QtWidgets.QCheckBox]:
         return self._flag_checkboxes
+    
+    def save_settings(self) -> None:
+        for chk in self._flag_checkboxes.values():
+            chk.save_settings()

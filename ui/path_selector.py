@@ -7,6 +7,8 @@ try:
 except ImportError:
     from PySide6 import QtCore, QtWidgets
 
+from ..core.settings import Settings
+
 
 class BasePathWidget(QtWidgets.QWidget):
 
@@ -41,11 +43,14 @@ class BasePathWidget(QtWidgets.QWidget):
                  parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
 
+        self._name = name
+        self._settings = Settings()
+
         layout = QtWidgets.QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(5)
 
-        label = QtWidgets.QLabel(name, self)
+        label = QtWidgets.QLabel(self._name, self)
         label.setFixedWidth(label_size)
         layout.addWidget(label)
 
@@ -58,6 +63,7 @@ class BasePathWidget(QtWidgets.QWidget):
         layout.addWidget(self._browse_button)
 
         self.setStyleSheet(self.STYLE.format(class_name=type(self).__name__))
+        self.restore_settings()
 
     @property
     def path(self) -> Path | None:
@@ -69,6 +75,19 @@ class BasePathWidget(QtWidgets.QWidget):
 
     def _on_browse_clicked(self) -> None:
         raise NotImplementedError
+    
+    def restore_settings(self):
+        value = self._settings.get(self._key_settings)
+        if value:
+            self.set_path(value)
+
+    def save_settings(self) -> None:
+        self._settings.set(self._key_settings, self.path)
+    
+    @property
+    def _key_settings(self) -> str:
+        key = self._name.replace(" ", "_")
+        return f"paths/{key}"
 
 
 class SaveFileWidget(BasePathWidget):
