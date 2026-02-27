@@ -14,6 +14,10 @@ from ..capture.config import CaptureConfig, ViewConfig
 
 @contextmanager
 def SetEditorFlag(view_cfg: ViewConfig):
+    if not view_cfg.view:
+        yield
+        return
+
     name = maya_ui.get_editor_from_view(view_cfg.view)
     if not name:
         log.warning("Impossible to get editor from view.")

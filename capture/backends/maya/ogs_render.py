@@ -35,10 +35,10 @@ class OgsRenderBackend(CaptureBackend):
         img_path = Path(cmds.ogsRender(frame=float(frame),
                                        width=self._view_cfg.width,
                                        height=self._view_cfg.height,
-                                       camera=cmds.lookThru(query=True),
+                                       camera=self._view_cfg.camera,
                                        currentView=True))
         array = self._read_image(img_path)
-        img_path.unlink()
+        # img_path.unlink()
 
         return array
 

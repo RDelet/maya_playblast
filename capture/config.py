@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from maya import OpenMayaUI as omui
+from maya import cmds, OpenMayaUI as omui
 
 from ..io import io_utils
 from ..maya import maya_ui, maya_utils
@@ -51,6 +51,7 @@ class ViewConfig:
     view: omui.M3dView
     width: int | None = None
     height: int | None = None
+    camera: str = "persp"
     flags: ViewportFlags = field(default_factory=lambda: VIEWPORT_FLAGS.copy())
 
     def __post_init__(self):

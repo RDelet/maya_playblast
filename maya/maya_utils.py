@@ -31,4 +31,6 @@ def get_frame_rate() -> int:
 
 def get_cameras() -> List[str]:
     cameras = cmds.ls(type="camera", long=True)
+    if not cameras:
+        return []
     return cmds.listRelatives(cameras, parent=True, fullPath=True)
