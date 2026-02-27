@@ -2,14 +2,12 @@ from __future__ import annotations
 
 from ..backends.base import CaptureBackend
 from ..backends.maya.view import ViewBackend
-from ..backends.maya.render import RenderBackend
 from ..backends.maya.ogs_render import OgsRenderBackend
 from ..config import ViewConfig
 from ...core.logger import log
 
 
 _MAYA_BACKENDS: list[type[CaptureBackend]] = [
-    RenderBackend,
     ViewBackend,
     OgsRenderBackend,
 ]

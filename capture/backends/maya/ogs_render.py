@@ -33,10 +33,10 @@ class OgsRenderBackend(CaptureBackend):
         maya_utils.current_time(frame)
 
         img_path = Path(cmds.ogsRender(frame=float(frame),
-                                        width=self._view_cfg.width,
-                                        height=self._view_cfg.height,
-                                        camera=cmds.lookThru(query=True),
-                                        currentView=True))
+                                       width=self._view_cfg.width,
+                                       height=self._view_cfg.height,
+                                       camera=cmds.lookThru(query=True),
+                                       currentView=True))
         array = self._read_image(img_path)
         img_path.unlink()
 

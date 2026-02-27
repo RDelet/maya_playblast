@@ -15,14 +15,15 @@ def open_player(path: str | Path):
         raise RuntimeError(f"Path {path} does not exists !")
 
     settings = Settings()
-    if not settings.player_path:
+    player_path = settings.get_player()
+    if not player_path:
         raise RuntimeError("Player path is not set. Please set it in the settings.")
-    if not settings.player_path.exists():
-        raise RuntimeError(f"Player path {settings.player_path} does not exist. Please check your settings.")
+    if not player_path.exists():
+        raise RuntimeError(f"Player path {player_path} does not exist. Please check your settings.")
 
     try:
-        log.warning(f"Open file {path} with {settings.player_path}")
-        return subprocess.Popen([str(settings.player_path), str(path)],
+        log.warning(f"Open file {path} with {player_path}")
+        return subprocess.Popen([str(player_path), str(path)],
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                 creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP)
     except Exception as e:
@@ -41,7 +42,7 @@ def ffmpeg_capture(config: CaptureConfig, view_cfg: ViewConfig):
                 '-y',
                 '-f', 'rawvideo',
                 '-vcodec', 'rawvideo',
-                '-pix_fmt', 'bgra',
+                '-pix_fmt', 'rgba',
                 '-s', f'{view_cfg.width}x{view_cfg.height}',
                 '-framerate', f'{config.frame_rate}',
                 '-i', '-',

@@ -61,7 +61,7 @@ class ViewportFlags:
         new_flags = copy.deepcopy(self.flags)
         return ViewportFlags(flags=new_flags)
 
-    def snapshot(self, panel: str) -> List[ViewportFlag]:
+    def snapshot(self, panel: str) -> ViewportFlags:
         result = []
         for flag in self.flags:
             try:
@@ -69,7 +69,7 @@ class ViewportFlags:
             except Exception as e:
                 log.error(f"Error getting state of {flag.name} !", e)
 
-        return result
+        return ViewportFlags(flags=result)
 
 
 VIEWPORT_FLAGS = ViewportFlags(flags=[
@@ -121,4 +121,4 @@ def set_viewport_state(panel: str, state: ViewportFlag):
 
 def set_viewport_states(panel: str, states: List[ViewportFlag] | ViewportFlags):
     for state in states:
-        set_viewport_states(panel, state)
+        set_viewport_state(panel, state)
