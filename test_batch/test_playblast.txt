@@ -1,0 +1,419 @@
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/bin/plug-ins
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Could not find maya.utils._guiExceptHook.
+Invalid Python Environment: Python is unable to find Maya's Python modules
+Python Environment:
+  Py_GetPythonHome returns C:/Program Files/Autodesk/Maya2022\Python37
+  PYTHONPATH = ;C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts;C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts;C:/Program Files/Rokoko Motion Library/Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts;C:/Program Files/Autodesk/Arnold/maya2022/scripts;C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts;C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts;C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python;C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+  System modules located at: C:\Program Files\Autodesk\Maya2022\Python37\lib
+  Search path (sys.path):
+    d:/Work/GitHub/maya_playblast
+    C:/Program Files/Autodesk/Maya2022/plug-ins/ATF/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/scripts
+    C:/Program Files/Common Files/Autodesk/ApplicationPlugins/bifrost/Contents/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/MASH/scripts
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/plugin/adsk/scripts
+    C:/Program Files/Rokoko Motion Library/Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/fbx/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/camd/scripts
+    C:/Program Files/Autodesk/Arnold/maya2022/scripts
+    C:/Program Files/Allegorithmic/Adobe Substance 3D for Maya/2022/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/sweep/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/vnn/scripts
+    C:/Program Files/Autodesk/Maya2022/plug-ins/xgen/scripts
+    C:/Program Files/Autodesk/Bifrost/Maya2022/2.3.1.0/bifrost/python/site-packages
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/MayaUSD3/lib/python
+    C:/Program Files/Autodesk/MayaUSD/Maya2022/0.13.0/mayausd/USD3/lib/python
+    C:/Program Files/Autodesk/Maya2022/bin/python37.zip
+    C:/Program Files/Autodesk/Maya2022/Python37/DLLs
+    C:/Program Files/Autodesk/Maya2022/Python37/lib
+    C:/Program Files/Autodesk/Maya2022/bin
+    C:/Program Files/Autodesk/Maya2022/Python37
+    C:/Program Files/Autodesk/Maya2022/Python37/lib/site-packages
+Result: untitled
