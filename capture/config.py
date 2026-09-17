@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from maya import cmds, OpenMayaUI as omui
+from maya import OpenMayaUI as omui
 
 from ..io import io_utils
 from ..maya import maya_ui, maya_utils
@@ -19,16 +19,14 @@ class CaptureConfig:
     start_frame: int | None = None
     end_frame: int | None = None
     frame_rate: int | None = None
-    # For custom panel
-    width: int | None = 1920 * 0.5
-    height: int | None = 1080 * 0.5
 
     def __post_init__(self) -> None:
         if self.crf < 0 or self.crf > 51:
             raise ValueError(f"CRF must be between 0 and 51, got {self.crf}")
-        
+
         if isinstance(self.output_path, str):
             self.output_path = Path(self.output_path)
+        io_utils.check_directory(self.output_path, build=True)
         if self.output_path.exists():
             self.output_path = io_utils.increment_file_path(self.output_path)
 
@@ -44,17 +42,20 @@ class CaptureConfig:
         return self.end_frame - self.start_frame + 1
 
 
-
 @dataclass
 class ViewConfig:
 
-    view: omui.M3dView
+    view: omui.M3dView | None = None
     width: int | None = None
     height: int | None = None
     camera: str = "persp"
     flags: ViewportFlags = field(default_factory=lambda: VIEWPORT_FLAGS.copy())
 
     def __post_init__(self):
+        if self.view is None:
+            if self.width is None or self.height is None:
+                raise ValueError("width and height are required when no view is provided")
+            return
         if self.width is None:
             self.width = self.view.portWidth()
         if self.height is None:
@@ -63,7 +64,15 @@ class ViewConfig:
     @classmethod
     def from_active(cls) -> ViewConfig:
         return cls(view=maya_ui.get_active_view())
-    
+
     @property
-    def panel(self) -> str:
+    def panel(self) -> str | None:
+        if not self.view:
+            return None
         return maya_ui.get_editor_from_view(self.view)
+
+    @property
+    def model_panel(self) -> str | None:
+        if not self.view:
+            return None
+        return maya_ui.get_model_panel_from_view(self.view)

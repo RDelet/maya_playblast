@@ -62,6 +62,7 @@ class ComboBox(QtWidgets.QWidget):
 
         self._combobox.setStyleSheet(self.STYLE)
         self.restore_settings()
+        self._combobox.currentIndexChanged.connect(self.save_settings)
     
     def add_callback(self, callback: callable):
         self._combobox.currentIndexChanged.connect(callback)
@@ -74,12 +75,16 @@ class ComboBox(QtWidgets.QWidget):
     def current_index(self, index: int):
         self._combobox.setCurrentIndex(index)
     
+    @property
+    def current_value(self) -> str:
+        return self._combobox.currentText()
+
     def restore_settings(self):
         value = self._settings.get(self._key_settings)
         if value:
             self.current_index = int(value)
 
-    def save_settings(self) -> None:
+    def save_settings(self, *args) -> None:
         self._settings.set(self._key_settings, self.current_index)
     
     @property

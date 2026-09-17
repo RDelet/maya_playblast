@@ -1,12 +1,11 @@
 from __future__ import annotations
+
 import copy
 from dataclasses import dataclass, field
-from typing import Dict, List
 
 from maya import cmds
 
 from ..core.logger import log
-from ..maya import maya_ui
 
 
 @dataclass
@@ -16,37 +15,20 @@ class ViewportFlag:
     keep_visible: bool = False
 
     @property
-    def as_dict(self) -> Dict[str, bool]:
+    def as_dict(self) -> dict[str, bool]:
         return {self.name: self.value}
-    
+
     def viewport_state(self, panel: str) -> bool:
         return cmds.modelEditor(panel, query=True, **{self.name: True})
-
-    def viewport_states(self) -> Dict[str, bool]:
-        output = {}
-        for panel in maya_ui.get_panels():
-            output[panel] = self.viewport_state(panel)
-    
-    def set_from_viewport(self, panel: str):
-        self.value = self.viewport_state(panel)
 
 
 @dataclass
 class ViewportFlags:
-    flags: List[ViewportFlag] = field(default_factory=list)
-    _index: Dict[str, ViewportFlag] = field(default_factory=dict, init=False, repr=False)
+    flags: list[ViewportFlag] = field(default_factory=list)
+    _index: dict[str, ViewportFlag] = field(default_factory=dict, init=False, repr=False)
 
-    def __iter__(self):
-        return iter(self.flags)
-    
     def __post_init__(self):
-        self._index = {f.name: f for f in self.flags}
-
-    def __getitem__(self, name: str) -> ViewportFlag:
-        return self.get(name)
-    
-    def __setitem__(self, name: str, value: bool):
-        self.set(name, value)
+        self._index = {flag.name: flag for flag in self.flags}
 
     def get(self, name: str) -> ViewportFlag:
         if name not in self._index:
@@ -56,7 +38,7 @@ class ViewportFlags:
     def set(self, name: str, value: bool):
         flag = self.get(name)
         flag.value = value
-    
+
     def copy(self) -> ViewportFlags:
         new_flags = copy.deepcopy(self.flags)
         return ViewportFlags(flags=new_flags)
@@ -108,7 +90,7 @@ VIEWPORT_FLAGS = ViewportFlags(flags=[
     ViewportFlag("strokes"),
     ViewportFlag("subdivSurfaces"),
     ViewportFlag("textures"),
-    ViewportFlag("transpInShadows"),
+    ViewportFlag("transpInShadows")
 ])
 
 
@@ -119,6 +101,7 @@ def set_viewport_state(panel: str, state: ViewportFlag):
         log.error(f"Error on set flag {state.name} !\n\t{e}")
 
 
-def set_viewport_states(panel: str, states: List[ViewportFlag] | ViewportFlags):
-    for state in states:
+def set_viewport_states(panel: str, states: list[ViewportFlag] | ViewportFlags):
+    flags = states.flags if isinstance(states, ViewportFlags) else states
+    for state in flags:
         set_viewport_state(panel, state)

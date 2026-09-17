@@ -1,0 +1,28 @@
+[project]
+name = "maya-playblast"
+version = "0.1.0"
+description = "Custom Maya playblast with FFmpeg encoding"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy"
+]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+    "maya_playblast",
+    "maya_playblast.capture",
+    "maya_playblast.core",
+    "maya_playblast.io",
+    "maya_playblast.maya",
+    "maya_playblast.ui"
+]
+
+[tool.setuptools.package-dir]
+maya_playblast = "."
+
+[tool.ruff]
+line-length = 120

@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 try:
     from PySide2 import QtCore, QtWidgets
-except:
+except ImportError:
     from PySide6 import QtCore, QtWidgets
 
 from ..core.constants import CLOSE_ICON_PATH
@@ -12,7 +10,6 @@ from ..core.settings import Settings
 from .frameless_window import FramelessWindow
 from .icon_button import IconButton
 from .path_selector import FileSelector
-from .window_header import WindowHeader
 from ..ui.separator import Separator
 
 
@@ -41,11 +38,11 @@ class SettingsWidget(FramelessWindow):
         self._main_layout.addWidget(Separator("", parent=self))
 
         self._ffmpeg_selector = FileSelector("FFmpeg Path", "exe", parent=self)
-        self._ffmpeg_selector.FILE_SELECTED.connect(self.save_settings)
+        self._ffmpeg_selector.PATH_CHANGED.connect(self.save_settings)
         self._main_layout.addWidget(self._ffmpeg_selector)
 
         self._player_selector = FileSelector("Player Path", "exe", parent=self)
-        self._player_selector.FILE_SELECTED.connect(self.save_settings)
+        self._player_selector.PATH_CHANGED.connect(self.save_settings)
         self._main_layout.addWidget(self._player_selector)
     
     def _build_header(self):
@@ -58,15 +55,13 @@ class SettingsWidget(FramelessWindow):
         if ffmpeg_path:
             self._ffmpeg_selector.set_path(ffmpeg_path)
         
-        player_path = self._settings.get_ffmpeg()
+        player_path = self._settings.get_player()
         if player_path:
             self._player_selector.set_path(player_path)
 
     def save_settings(self, *args) -> None:
-        self._settings.set(self._settings.FFMPEG_KEY, self._ffmpeg_selector.path)
-        self._settings.set(self._settings.PLAYER_KEY, self._player_selector.path)
-    
-    @property
-    def _key_settings(self) -> str:
-        return f"ui/groups/{self._title}"
+        if self._ffmpeg_selector.path:
+            self._settings.set(self._settings.FFMPEG_KEY, self._ffmpeg_selector.path)
+        if self._player_selector.path:
+            self._settings.set(self._settings.PLAYER_KEY, self._player_selector.path)
  

@@ -11,7 +11,7 @@ except:
 from ..core.logger import log
 from ..core.constants import MUXERS, VIDEO_ENCODERS, CLOSE_ICON_PATH, SETTINGS_ICON_PATH
 from ..core.settings import Settings
-from ..io import io_utils, launchers
+from ..io import launchers
 from ..maya import maya_ui, maya_utils
 from ..capture.config import CaptureConfig
 from ..capture.frame_capture import FrameCapture
@@ -70,13 +70,10 @@ class PlayblastDialog(FramelessWindow):
 
         self._drag_pos = None
         self._settings = Settings()
+        self._syncing_container = False
         
         self._build_ui()
         self.setStyleSheet(self.STYLE)
-    
-    def closeEvent(self, event):
-        self._save_settings()
-        super().closeEvent(event)
 
     def _build_ui(self):
         self._build_header()
@@ -132,6 +129,9 @@ class PlayblastDialog(FramelessWindow):
 
         self._crf_widget = SliderSpinBox("CRF", range=(0, 51), default_value=24)
         self._encoding_widget.add_widget(self._crf_widget)
+
+        self._path_selector.PATH_CHANGED.connect(self._on_output_path_changed)
+        self._on_muxer_changed()
     
     def _build_visibility_group(self):
         self._visibility_widget = Group("Visibility", expanded=False, parent=self)
@@ -161,8 +161,33 @@ class PlayblastDialog(FramelessWindow):
     def extension(self) -> str:
         return MUXERS[self._muxers.current_index][0]
 
-    def _on_muxer_changed(self):
-        self._path_selector.update_extension(self.extension)
+    def _muxer_index(self, extension: str) -> int | None:
+        extension = extension.lower()
+        for i, (mux, _) in enumerate(MUXERS):
+            if mux.lower() == extension:
+                return i
+        return None
+
+    def _on_muxer_changed(self, *args):
+        if self._syncing_container:
+            return
+        self._syncing_container = True
+        try:
+            self._path_selector.update_extension(self.extension)
+        finally:
+            self._syncing_container = False
+
+    def _on_output_path_changed(self, path: Path):
+        if self._syncing_container or not path:
+            return
+        self._syncing_container = True
+        try:
+            index = self._muxer_index(path.suffix.lstrip("."))
+            if index is not None:
+                self._muxers.current_index = index
+            self._path_selector.update_extension(self.extension)
+        finally:
+            self._syncing_container = False
 
     def _on_open_settings_widget(self):
         SettingsWidget(maya_ui.get_main_window()).show()
@@ -172,31 +197,18 @@ class PlayblastDialog(FramelessWindow):
             log.error("Output path is not set.")
             return
 
-        io_utils.check_directory(self.output_path, build=True)
         capture_config = CaptureConfig(output_path=self.output_path,
                                        codec=self.codec,
                                        crf=self._crf_widget.value,
                                        start_frame=self.start_frame,
                                        end_frame=self.end_frame)
         view_config = self._viewport_widget.config
+        view_config.camera = self._cameras.current_value
         capture = FrameCapture(capture_config, view_config)
         player_path = self._settings.get_player()
         if player_path:
             capture.on_capture_complete.register(launchers.open_player)
         capture.run()
-    
-    def _save_settings(self):
-        self._path_selector.save_settings()
-        self._cameras.save_settings()
-
-        self._encoding_widget.save_settings()
-        self._muxers.save_settings()
-        self._encoders.save_settings()
-        self._crf_widget.save_settings()
-
-        self._visibility_widget.save_settings()
-        self._viewport_widget.save_settings()
-        self._settings.save()
 
     def _resize_window(self, *args):
         self.layout().activate()

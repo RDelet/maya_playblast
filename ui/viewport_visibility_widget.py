@@ -19,24 +19,19 @@ class Checkbox(QtWidgets.QCheckBox):
         super().__init__(flag.name, parent)
         self._flag = flag
         self._settings = Settings()
-        # self.stateChanged.connect(self._on_state_changed)
         self.restore_settings()
-    
+        self.stateChanged.connect(self.save_settings)
+
     @property
     def flag(self) -> viewport.ViewportFlag:
         return self._flag
-    
-    def _on_state_changed(self, state: bool):
-        self._flag.value = state
-        for panel in maya_ui.get_panels():
-            viewport.set_viewport_state(panel, self._flag)
-    
+
     def restore_settings(self):
         value = self._settings.get(self._key_settings)
         if value:
             self.setChecked(value.lower() == "true")
 
-    def save_settings(self) -> None:
+    def save_settings(self, *args) -> None:
         self._settings.set(self._key_settings, self.isChecked())
     
     @property
@@ -92,6 +87,7 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
         super().__init__(parent)
 
         self._flag_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
+        self._flags = viewport.VIEWPORT_FLAGS.copy()
 
         self._layout = QtWidgets.QVBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
@@ -107,7 +103,7 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
         grid_layout.setContentsMargins(0, 0, 0, 0)
         self._layout.addLayout(grid_layout)
 
-        for idx, flag in enumerate(viewport.VIEWPORT_FLAGS):
+        for idx, flag in enumerate(self._flags.flags):
             widget = Checkbox(flag)
             self._flag_checkboxes[flag.name] = widget
             grid_layout.addWidget(widget, idx // columns, idx % columns)
@@ -147,7 +143,7 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
             chk.setChecked(chk.flag.viewport_state(panel))
     
     def _reset_flags(self):
-        for flag in viewport.VIEWPORT_FLAGS:
+        for flag in self._flags.flags:
             if flag.name in self._flag_checkboxes:
                 self._flag_checkboxes[flag.name].setChecked(flag.keep_visible)
     
@@ -155,14 +151,6 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
     def config(self) -> ViewConfig:
         view_config = ViewConfig.from_active()
         for name, widget in self._flag_checkboxes.items():
-            view_config.flags[name] = widget.isChecked()
+            view_config.flags.set(name, widget.isChecked())
 
         return view_config
-    
-    @property
-    def flag_widgets(self) -> dict[str, QtWidgets.QCheckBox]:
-        return self._flag_checkboxes
-    
-    def save_settings(self) -> None:
-        for chk in self._flag_checkboxes.values():
-            chk.save_settings()

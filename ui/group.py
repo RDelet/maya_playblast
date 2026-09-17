@@ -106,6 +106,7 @@ class Group(QtWidgets.QWidget):
     def __on_expand_clicked(self):
         self._expanded = self._expand.arrowType() == QtCore.Qt.RightArrow
         self.set_expanded(self._expanded)
+        self.save_settings()
         self.toggled.emit(self._expanded)
 
     def add_widget(self, widget: QtWidgets.QWidget):

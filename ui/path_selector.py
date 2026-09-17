@@ -12,6 +12,8 @@ from ..core.settings import Settings
 
 class BasePathWidget(QtWidgets.QWidget):
 
+    PATH_CHANGED = QtCore.Signal(object)
+
     STYLE = """
         {class_name} QLineEdit {{
             background: #1e1e1e;
@@ -55,6 +57,7 @@ class BasePathWidget(QtWidgets.QWidget):
         layout.addWidget(label)
 
         self._line_edit = QtWidgets.QLineEdit(self)
+        self._line_edit.editingFinished.connect(self._on_path_edited)
         layout.addWidget(self._line_edit)
 
         self._browse_button = QtWidgets.QPushButton("...", self)
@@ -71,7 +74,17 @@ class BasePathWidget(QtWidgets.QWidget):
         return Path(txt) if txt else None
 
     def set_path(self, path: str | Path) -> None:
-        self._line_edit.setText(str(path))
+        text = str(path)
+        if self._line_edit.text() == text:
+            return
+        self._line_edit.setText(text)
+        self.save_settings()
+        self.PATH_CHANGED.emit(Path(text))
+
+    def _on_path_edited(self):
+        self.save_settings()
+        if self.path:
+            self.PATH_CHANGED.emit(self.path)
 
     def _on_browse_clicked(self) -> None:
         raise NotImplementedError
@@ -82,6 +95,8 @@ class BasePathWidget(QtWidgets.QWidget):
             self.set_path(value)
 
     def save_settings(self) -> None:
+        if not self.path:
+            return
         self._settings.set(self._key_settings, self.path)
     
     @property
@@ -94,13 +109,14 @@ class SaveFileWidget(BasePathWidget):
 
     def __init__(self, name: str, extension: str, label_size: int = 80,
                  parent: QtWidgets.QWidget | None = None):
+        self._extension = extension.lstrip(".")
         super().__init__(name, label_size, parent)
-        self._extension = extension
 
     def update_extension(self, ext: str) -> None:
-        self._extension = ext
-        if self.path:
-            self.set_path(self.path.parent / f"{self.path.stem}.{ext}")
+        self._extension = ext.lstrip(".")
+        if not self.path:
+            return
+        self.set_path(self.path.with_suffix(f".{self._extension}"))
 
     def _on_browse_clicked(self) -> None:
         dialog = QtWidgets.QFileDialog(self, "Select Output Path")
@@ -111,8 +127,6 @@ class SaveFileWidget(BasePathWidget):
 
 
 class FileSelector(BasePathWidget):
-
-    FILE_SELECTED = QtCore.Signal(Path)
 
     def __init__(self, name: str, extensions: str | list[str] | None = None,
                  label_size: int = 80, parent: QtWidgets.QWidget | None = None):
@@ -128,7 +142,6 @@ class FileSelector(BasePathWidget):
         )
         if path:
             self.set_path(path)
-            self.FILE_SELECTED.emit(Path(path))
 
     def _build_filters(self) -> str:
         if not self._extensions:

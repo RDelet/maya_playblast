@@ -2,12 +2,8 @@ from pathlib import Path
 
 
 ROOT_PATH = Path(__file__).parent.parent
-SETTINGS_PATH = ROOT_PATH / "settings.ini"
 CLOSE_ICON_PATH = ROOT_PATH / "icons" / "close.svg"
 SETTINGS_ICON_PATH = ROOT_PATH / "icons" / "settings.svg"
-
-OVERRIDE_NAME = "PlayblastOffscreenOverride"
-
 
 MUXERS = [('mp4', 'MP4 (MPEG-4 Part 14)'),
           ('mov', 'QuickTime / MOV'),
@@ -29,7 +25,6 @@ MUXERS = [('mp4', 'MP4 (MPEG-4 Part 14)'),
           ('ivf', 'On2 IVF'),
           ('asf', 'ASF (Advanced / Active Streaming Format)'),
           ('rm', 'RealMedia')]
-
 
 VIDEO_ENCODERS = [('libx264', 'libx264 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10'),
                   ('libx264rgb', 'libx264 H.264 / AVC (RGB variant)'),
@@ -109,33 +104,3 @@ VIDEO_ENCODERS = [('libx264', 'libx264 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10
                   ('wrapped_avframe', 'AVFrame to AVPacket passthrough'),
                   ('a64multi', 'Multicolor charset for Commodore 64'),
                   ('a64multi5', 'Multicolor charset for Commodore 64 (5th color)')]
-
-IMAGE_ENCODERS = [('png', 'PNG (Portable Network Graphics)'),
-                  ('gif', 'GIF (Graphics Interchange Format)'),
-                  ('apng', 'APNG (Animated Portable Network Graphics)'),
-                  ('bmp', 'BMP (Windows and OS/2 bitmap)'),
-                  ('libwebp', 'libwebp WebP image'),
-                  ('libwebp_anim', 'libwebp WebP image (animated)'),
-                  ('exr', 'OpenEXR image'),
-                  ('dpx', 'DPX (Digital Picture Exchange)'),
-                  ('tiff', 'TIFF image'),
-                  ('targa', 'Truevision Targa image'),
-                  ('sgi', 'SGI image'),
-                  ('jpeg2000', 'JPEG 2000'),
-                  ('libopenjpeg', 'OpenJPEG JPEG 2000'),
-                  ('jpegls', 'JPEG-LS'),
-                  ('ljpeg', 'Lossless JPEG'),
-                  ('ppm', 'PPM (Portable PixelMap)'),
-                  ('pgm', 'PGM (Portable GrayMap)'),
-                  ('pbm', 'PBM (Portable BitMap)'),
-                  ('pam', 'PAM (Portable AnyMap)'),
-                  ('pfm', 'PFM (Portable FloatMap)'),
-                  ('pgmyuv', 'PGMYUV (Portable GrayMap YUV)'),
-                  ('pcx', 'PC Paintbrush PCX image'),
-                  ('alias_pix', 'Alias/Wavefront PIX image'),
-                  ('fits', 'FITS (Flexible Image Transport System)'),
-                  ('vbn', 'Vizrt Binary Image'),
-                  ('sunrast', 'Sun Rasterfile image'),
-                  ('xbm', 'XBM (X BitMap) image'),
-                  ('xwd', 'XWD (X Window Dump) image'),
-                  ('xface', 'X-face image')]
