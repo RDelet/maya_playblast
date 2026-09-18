@@ -30,6 +30,14 @@ def open_player(path: str | Path):
         raise RuntimeError(f"Failed  to read {path} !\n\t{e}") from e
 
 
+def reveal_in_explorer(path: str | Path):
+    if isinstance(path, str):
+        path = Path(path)
+    if not path.exists():
+        raise RuntimeError(f"Path {path} does not exists !")
+    subprocess.Popen(["explorer", "/select,", str(path)])
+
+
 def ffmpeg_capture(config: CaptureConfig, view_cfg: ViewConfig):
     settings = Settings()
     ffmpeg_path = settings.get_ffmpeg()
@@ -51,4 +59,5 @@ def ffmpeg_capture(config: CaptureConfig, view_cfg: ViewConfig):
                 '-pix_fmt', 'yuv444p',
                 str(config.output_path)]
 
-    return subprocess.Popen(proc_cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    return subprocess.Popen(proc_cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE,
+                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))

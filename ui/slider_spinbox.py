@@ -91,6 +91,9 @@ class SliderSpinBox(QtWidgets.QWidget):
         self.setStyleSheet(self.STYLE)
         self.restore_settings()
         self._slider.valueChanged.connect(self.save_settings)
+
+    def add_callback(self, callback: callable):
+        self._slider.valueChanged.connect(callback)
     
     @property
     def value(self) -> int:
@@ -103,8 +106,9 @@ class SliderSpinBox(QtWidgets.QWidget):
     
     def restore_settings(self):
         value = self._settings.get(self._key_settings)
-        if value:
-            self.value = int(value)
+        if value is None or str(value) == "":
+            return
+        self.value = int(value)
 
     def save_settings(self, *args) -> None:
         self._settings.set(self._key_settings, self.value)

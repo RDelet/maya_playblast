@@ -70,7 +70,8 @@ def main():
         codec="libx264",
         crf=24,
         start_frame=start_frame,
-        end_frame=end_frame)
+        end_frame=end_frame,
+        overwrite=True)
 
     print(f"\t\tframes    : {capture_config.start_frame} → {capture_config.end_frame} "
           f"({capture_config.frame_count} frames @ {capture_config.frame_rate} fps)")

@@ -6,6 +6,7 @@ from pathlib import Path
 from maya import OpenMayaUI as omui
 
 from ..io import io_utils
+from ..core.settings import Settings
 from ..maya import maya_ui, maya_utils
 from ..maya.viewport import ViewportFlags, VIEWPORT_FLAGS
 
@@ -19,6 +20,7 @@ class CaptureConfig:
     start_frame: int | None = None
     end_frame: int | None = None
     frame_rate: int | None = None
+    overwrite: bool = False
 
     def __post_init__(self) -> None:
         if self.crf < 0 or self.crf > 51:
@@ -27,8 +29,8 @@ class CaptureConfig:
         if isinstance(self.output_path, str):
             self.output_path = Path(self.output_path)
         io_utils.check_directory(self.output_path, build=True)
-        if self.output_path.exists():
-            self.output_path = io_utils.increment_file_path(self.output_path)
+        if not self.overwrite:
+            self.output_path = io_utils.next_versioned_path(self.output_path, Settings().get_version_format())
 
         if self.start_frame is None:
             self.start_frame = maya_utils.get_animation_start()

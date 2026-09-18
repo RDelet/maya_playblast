@@ -7,7 +7,7 @@ from maya import cmds
 
 from .config import ViewConfig
 from ..core.logger import log
-from ..maya import maya_utils
+from ..maya import look, maya_ui, maya_utils, viewport
 
 try:
     from maya.api import OpenMayaRender as omr
@@ -28,6 +28,7 @@ class ViewportRenderer:
         self._target = None
         self._source_name = ""
         self._source_fallback = ""
+        self._capture_window = ""
 
     def setup(self) -> None:
         if omr is None:
@@ -45,6 +46,9 @@ class ViewportRenderer:
         log.debug(f"ViewportRenderer source: {self._source_name}")
 
     def teardown(self) -> None:
+        if self._capture_window:
+            maya_ui.delete_capture_panel(self._capture_window)
+            self._capture_window = ""
         if self._target_manager is not None and self._target is not None:
             self._target_manager.releaseRenderTarget(self._target)
         self._target = None
@@ -57,14 +61,42 @@ class ViewportRenderer:
         return self._pixels_from_target()
 
     def _resolve_sources(self) -> tuple[str, str]:
-        if not cmds.about(batch=True) and self._view_cfg.view:
-            panel = self._view_cfg.model_panel
-            if not panel:
-                raise RuntimeError("Could not resolve model panel from the active view.")
+        if cmds.about(batch=True) or not self._view_cfg.view:
+            shape = maya_utils.camera_shape(self._view_cfg.camera)
+            return f"batch:{shape}", f"batch:{self._view_cfg.camera}"
+
+        panel = self._view_cfg.model_panel
+        if not panel:
+            raise RuntimeError("Could not resolve model panel from the active view.")
+
+        view_w = self._view_cfg.view.portWidth()
+        view_h = self._view_cfg.view.portHeight()
+        if self._view_cfg.width == view_w and self._view_cfg.height == view_h:
             return f"viewport:{panel}", panel
 
-        shape = maya_utils.camera_shape(self._view_cfg.camera)
-        return f"batch:{shape}", f"batch:{self._view_cfg.camera}"
+        try:
+            window, sized_panel, editor = maya_ui.create_capture_panel(
+                self._view_cfg.width,
+                self._view_cfg.height,
+                self._view_cfg.camera)
+            self._capture_window = window
+            self._copy_panel_state(panel, editor)
+            cmds.refresh(force=True)
+            log.debug(f"Capture panel {sized_panel} at {self._view_cfg.width}x{self._view_cfg.height}")
+            return f"viewport:{sized_panel}", sized_panel
+        except Exception as exc:
+            log.warning(f"Could not open sized capture view, using active panel: {exc}")
+            return f"viewport:{panel}", panel
+
+    def _copy_panel_state(self, source_panel: str, dest_editor: str):
+        source_editor = cmds.modelPanel(source_panel, query=True, modelEditor=True)
+        viewport.set_viewport_states(dest_editor, self._view_cfg.flags)
+        look.apply_look(look.read_look(source_editor), dest_editor)
+        try:
+            appearance = cmds.modelEditor(source_editor, query=True, displayAppearance=True)
+            cmds.modelEditor(dest_editor, edit=True, displayAppearance=appearance)
+        except Exception:
+            pass
 
     def _acquire_target(self):
         desc = omr.MRenderTargetDescription()

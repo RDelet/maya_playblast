@@ -45,6 +45,7 @@ class Group(QtWidgets.QWidget):
         self._title = title
         self._settings = Settings()
         self._expanded = expanded
+        self._fill_height = False
 
         self._layout = QtWidgets.QVBoxLayout(self)
         self._layout.setContentsMargins(2, 2, 2, 2)
@@ -95,8 +96,8 @@ class Group(QtWidgets.QWidget):
         self._expand.setArrowType(QtCore.Qt.DownArrow if expanded else QtCore.Qt.RightArrow)
         self._widget.setVisible(expanded)
         self._widget.setMaximumHeight(16777215 if expanded else 0)
+        self._apply_fill()
         self._widget.updateGeometry()
-
         self.updateGeometry()
 
     def set_header_color(self, color: str | None = None):
@@ -109,8 +110,25 @@ class Group(QtWidgets.QWidget):
         self.save_settings()
         self.toggled.emit(self._expanded)
 
-    def add_widget(self, widget: QtWidgets.QWidget):
-        self._widget.layout().addWidget(widget)
+    def add_widget(self, widget: QtWidgets.QWidget, stretch: int = 0):
+        self._widget.layout().addWidget(widget, stretch)
+
+    def set_fill_height(self, fill: bool):
+        self._fill_height = fill
+        self._apply_fill()
+
+    def _apply_fill(self):
+        fill = self._fill_height and self._expanded
+        align = QtCore.Qt.Alignment() if fill else QtCore.Qt.AlignTop
+        self._layout.setAlignment(align)
+        self._widget.layout().setAlignment(align)
+        vertical = QtWidgets.QSizePolicy.Expanding if fill else QtWidgets.QSizePolicy.Preferred
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, vertical)
+        self._widget.setSizePolicy(QtWidgets.QSizePolicy.Preferred, vertical)
+
+    @property
+    def expanded(self) -> bool:
+        return self._expanded
 
     def add_layout(self, layout: QtWidgets.QLayout):
         self._widget.layout().addLayout(layout)

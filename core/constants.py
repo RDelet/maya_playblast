@@ -104,3 +104,5 @@ VIDEO_ENCODERS = [('libx264', 'libx264 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10
                   ('wrapped_avframe', 'AVFrame to AVPacket passthrough'),
                   ('a64multi', 'Multicolor charset for Commodore 64'),
                   ('a64multi5', 'Multicolor charset for Commodore 64 (5th color)')]
+
+VIDEO_SUFFIXES = tuple("." + item[0] for item in MUXERS)

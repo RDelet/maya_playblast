@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from maya import cmds, OpenMaya as om
 
 
@@ -38,3 +40,41 @@ def camera_shape(name: str) -> str:
         raise ValueError(f"No camera shape found for '{name}'")
 
     return shapes[0]
+
+
+def maya_workspace_root() -> Path | None:
+    try:
+        raw = cmds.workspace(query=True, rootDirectory=True)
+    except Exception:
+        return None
+    if not raw or not str(raw).strip():
+        return None
+    root = Path(raw)
+    if not root.exists():
+        return None
+    return root
+
+
+def workspace_root(custom: str | Path | None = None) -> Path | None:
+    if custom is not None:
+        text = str(custom).strip()
+        return Path(text) if text else None
+    return maya_workspace_root()
+
+
+def scene_stem() -> str:
+    scene = cmds.file(query=True, sceneName=True, shortName=True)
+    if not scene:
+        return "playblast"
+    return Path(scene).stem
+
+
+def output_directory(shot: str = "", workspace: str | Path | None = None, subfolder: str = "") -> Path:
+    if workspace is None:
+        return Path()
+    path = Path(str(workspace).strip())
+    folder = (subfolder or "").replace("\\", "/").strip("/")
+    if folder:
+        path = path / folder
+    shot_name = (shot or "").replace("\\", "/").strip("/")
+    return path / shot_name if shot_name else path

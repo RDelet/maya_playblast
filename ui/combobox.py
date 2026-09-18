@@ -79,10 +79,16 @@ class ComboBox(QtWidgets.QWidget):
     def current_value(self) -> str:
         return self._combobox.currentText()
 
+    def set_value(self, value: str):
+        index = self._combobox.findText(value)
+        if index >= 0:
+            self.current_index = index
+
     def restore_settings(self):
         value = self._settings.get(self._key_settings)
-        if value:
-            self.current_index = int(value)
+        if value is None or str(value) == "":
+            return
+        self.current_index = int(value)
 
     def save_settings(self, *args) -> None:
         self._settings.set(self._key_settings, self.current_index)

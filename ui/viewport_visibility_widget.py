@@ -154,3 +154,19 @@ class ViewportVisibilityWidget(QtWidgets.QWidget):
             view_config.flags.set(name, widget.isChecked())
 
         return view_config
+
+    def flags_state(self) -> dict:
+        return {name: widget.isChecked() for name, widget in self._flag_checkboxes.items()}
+
+    def set_flag(self, name: str, value: bool):
+        widget = self._flag_checkboxes.get(name)
+        if widget is None:
+            return
+        widget.blockSignals(True)
+        widget.setChecked(value)
+        widget.blockSignals(False)
+        widget.save_settings()
+
+    def set_flags_state(self, state: dict):
+        for name, value in state.items():
+            self.set_flag(name, bool(value))
