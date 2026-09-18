@@ -30,10 +30,12 @@ class LabeledLineEdit(QtWidgets.QWidget):
     textChanged = QtCore.Signal(str)
 
     def __init__(self, name: str, default: str = "", label_size: int = 80,
+                 settings_key: str | None = None,
                  parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
 
         self._name = name
+        self._settings_key = settings_key
         self._settings = Settings()
 
         layout = QtWidgets.QHBoxLayout(self)
@@ -77,4 +79,6 @@ class LabeledLineEdit(QtWidgets.QWidget):
 
     @property
     def _key_settings(self) -> str:
+        if self._settings_key:
+            return self._settings_key
         return f"ui/line_edit/{self._name}"

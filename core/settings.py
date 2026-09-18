@@ -53,7 +53,7 @@ class Settings:
 
     def _check_ffmpeg_tools(self):
         for name, key in self._TOOL_KEYS:
-            path = self._as_path(self.get(key))
+            path = self.get_path(key)
             if path and path.exists():
                 continue
             found = search_exe(name)
@@ -68,7 +68,7 @@ class Settings:
     def fill_ffmpeg_siblings(self):
         resolved = []
         for name, key in self._TOOL_KEYS:
-            path = self._as_path(self.get(key))
+            path = self.get_path(key)
             if path and path.exists():
                 resolved.append(path)
         if not resolved:
@@ -82,7 +82,7 @@ class Settings:
                 self.set(key, sibling)
 
     def _check_player_path(self):
-        player_path = self.get_player()
+        player_path = self.get_path(self.PLAYER_KEY)
         if player_path and player_path.exists():
             return
         path = search_exe("OpenRV") or search_exe("vlc")
@@ -90,23 +90,6 @@ class Settings:
             self.set(self.PLAYER_KEY, path)
         else:
             log.warning("Player not found in PATH. Please set the path to a video player in the settings.")
-
-    def get_ffmpeg(self) -> Path | None:
-        return self._as_path(self.get(self.FFMPEG_KEY))
-
-    def get_ffplay(self) -> Path | None:
-        return self._as_path(self.get(self.FFPLAY_KEY))
-
-    def get_ffprobe(self) -> Path | None:
-        return self._as_path(self.get(self.FFPROBE_KEY))
-
-    def get_player(self) -> Path | None:
-        return self._as_path(self.get(self.PLAYER_KEY))
-
-    def get_maya_folder(self) -> str:
-        value = self.get(self.MAYA_FOLDER_KEY)
-        text = str(value).strip() if value else ""
-        return text or self.DEFAULT_MAYA_FOLDER
 
     def get_version_format(self) -> VersionFormat:
         prefix = self.get(self.VERSION_PREFIX_KEY)
@@ -120,8 +103,12 @@ class Settings:
             padding = self.DEFAULT_VERSION_PADDING
         return VersionFormat(str(prefix), padding, str(suffix))
 
-    def get(self, key: str):
-        return self._setting.value(key, None)
+    def get(self, key: str, default=None):
+        value = self._setting.value(key, None)
+        return default if value is None else value
+
+    def get_path(self, key: str) -> Path | None:
+        return self._as_path(self.get(key))
 
     def set(self, key: str, value: str | float | int | bool | Path):
         self._setting.setValue(key, str(value))
@@ -131,7 +118,7 @@ class Settings:
         self._setting.sync()
 
     def _existing(self, key: str) -> bool:
-        path = self._as_path(self.get(key))
+        path = self.get_path(key)
         return bool(path and path.exists())
 
     def _as_path(self, value) -> Path | None:

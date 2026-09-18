@@ -42,10 +42,12 @@ class BasePathWidget(QtWidgets.QWidget):
     """
 
     def __init__(self, name: str, label_size: int = 80,
+                 settings_key: str | None = None,
                  parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
 
         self._name = name
+        self._settings_key = settings_key
         self._settings = Settings()
 
         layout = QtWidgets.QHBoxLayout(self)
@@ -91,6 +93,10 @@ class BasePathWidget(QtWidgets.QWidget):
     
     def restore_settings(self):
         value = self._settings.get(self._key_settings)
+        if not value:
+            legacy = f"paths/{self._name.replace(' ', '_')}"
+            if legacy != self._key_settings:
+                value = self._settings.get(legacy)
         if value:
             self.set_path(value)
 
@@ -101,40 +107,21 @@ class BasePathWidget(QtWidgets.QWidget):
     
     @property
     def _key_settings(self) -> str:
+        if self._settings_key:
+            return self._settings_key
         key = self._name.replace(" ", "_")
         return f"paths/{key}"
-
-
-class SaveFileWidget(BasePathWidget):
-
-    def __init__(self, name: str, extension: str, label_size: int = 80,
-                 parent: QtWidgets.QWidget | None = None):
-        self._extension = extension.lstrip(".")
-        super().__init__(name, label_size, parent)
-
-    def update_extension(self, ext: str) -> None:
-        self._extension = ext.lstrip(".")
-        if not self.path:
-            return
-        self.set_path(self.path.with_suffix(f".{self._extension}"))
-
-    def _on_browse_clicked(self) -> None:
-        dialog = QtWidgets.QFileDialog(self, "Select Output Path")
-        dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
-        dialog.setNameFilters([f"Files (*.{self._extension})", "All Files (*)"])
-        if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            self.set_path(dialog.selectedFiles()[0])
 
 
 class FileSelector(BasePathWidget):
 
     def __init__(self, name: str, extensions: str | list[str] | None = None,
-                 label_size: int = 80, parent: QtWidgets.QWidget | None = None):
-        super().__init__(name, label_size, parent)
-
+                 label_size: int = 80, settings_key: str | None = None,
+                 parent: QtWidgets.QWidget | None = None):
         if isinstance(extensions, str):
             extensions = [extensions]
         self._extensions = extensions or []
+        super().__init__(name, label_size, settings_key, parent)
 
     def _on_browse_clicked(self) -> None:
         path, _ = QtWidgets.QFileDialog.getOpenFileName(

@@ -9,6 +9,7 @@ from pathlib import Path
 
 from ..core.logger import log
 from ..core.settings import Settings
+from .io_utils import no_window_flags
 
 WINDOW_TITLE = "maya_playblast_seq"
 
@@ -23,26 +24,11 @@ if sys.platform == "win32":
     _USER32.SetWindowLongPtrW.restype = ctypes.c_ssize_t
     _USER32.SetParent.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
     _USER32.SetParent.restype = ctypes.c_void_p
-    _USER32.MoveWindow.argtypes = [
-        ctypes.c_void_p,
-        ctypes.c_int,
-        ctypes.c_int,
-        ctypes.c_int,
-        ctypes.c_int,
-        ctypes.c_bool
-    ]
+    _USER32.MoveWindow.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool]
     _USER32.MoveWindow.restype = ctypes.c_bool
     _USER32.FindWindowW.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p]
     _USER32.FindWindowW.restype = ctypes.c_void_p
-    _USER32.SetWindowPos.argtypes = [
-        ctypes.c_void_p,
-        ctypes.c_void_p,
-        ctypes.c_int,
-        ctypes.c_int,
-        ctypes.c_int,
-        ctypes.c_int,
-        ctypes.c_uint
-    ]
+    _USER32.SetWindowPos.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_uint]
     _USER32.SetWindowPos.restype = ctypes.c_bool
     _USER32.IsWindow.argtypes = [ctypes.c_void_p]
     _USER32.IsWindow.restype = ctypes.c_bool
@@ -52,18 +38,20 @@ if sys.platform == "win32":
     _USER32.SendMessageW.restype = ctypes.c_ssize_t
 
 
-def write_concat_list(clips: list[Path]) -> Path:
+def write_concat_list(clips: list[Path], durations: list[float] | None = None) -> Path:
     path = Path(tempfile.gettempdir()) / "maya_playblast_concat.txt"
     lines = []
-    for clip in clips:
+    for index, clip in enumerate(clips):
         text = clip.resolve().as_posix().replace("'", r"'\''")
         lines.append(f"file '{text}'")
+        if durations and index < len(clips) - 1 and index < len(durations) and durations[index] > 0:
+            lines.append(f"duration {float(durations[index]):.6f}")
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
 
 
 def probe_duration(path: Path) -> float | None:
-    ffprobe = Settings().get_ffprobe()
+    ffprobe = Settings().get_path(Settings.FFPROBE_KEY)
     if not ffprobe or not ffprobe.exists():
         raise RuntimeError("FFprobe path is not set. Please set it in the settings.")
     result = subprocess.run(
@@ -71,13 +59,14 @@ def probe_duration(path: Path) -> float | None:
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         universal_newlines=True,
-        creationflags=_no_window_flags())
+        creationflags=no_window_flags())
     try:
         duration = float((result.stdout or "").strip())
     except ValueError:
         return None
     if duration <= 0:
         return None
+
     return duration
 
 
@@ -94,11 +83,12 @@ def valid_clips(clips: list[Path]) -> list[tuple[Path, float]]:
             raise
         except Exception as exc:
             log.warning(f"Skipping clip {clip}: {exc}")
+
     return kept
 
 
 def probe_fps(path: Path) -> float:
-    ffprobe = Settings().get_ffprobe()
+    ffprobe = Settings().get_path(Settings.FFPROBE_KEY)
     if not ffprobe or not ffprobe.exists():
         return 24.0
     result = subprocess.run(
@@ -107,7 +97,7 @@ def probe_fps(path: Path) -> float:
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         universal_newlines=True,
-        creationflags=_no_window_flags())
+        creationflags=no_window_flags())
     text = (result.stdout or "").strip()
     if "/" in text:
         num, den = text.split("/", 1)
@@ -127,16 +117,11 @@ def probe_fps(path: Path) -> float:
 
 
 def start_ffplay(concat_path: Path, width: int, height: int, start_seconds: float = 0.0) -> subprocess.Popen:
-    ffplay = Settings().get_ffplay()
+    ffplay = Settings().get_path(Settings.FFPLAY_KEY)
     if not ffplay or not ffplay.exists():
         raise RuntimeError("FFplay path is not set. Please set it in the settings.")
 
-    cmd = [
-        str(ffplay),
-        "-f", "concat",
-        "-safe", "0",
-        "-i", str(concat_path)
-    ]
+    cmd = [str(ffplay), "-f", "concat", "-safe", "0", "-fflags", "+genpts", "-i", str(concat_path)]
     if start_seconds > 0.001:
         cmd.extend(["-ss", f"{start_seconds:.3f}"])
     cmd.extend([
@@ -149,14 +134,11 @@ def start_ffplay(concat_path: Path, width: int, height: int, start_seconds: floa
         "-y", str(max(height, 16)),
         "-loglevel", "quiet"
     ])
-    kwargs = {
-        "stdout": subprocess.DEVNULL,
-        "stderr": subprocess.DEVNULL,
-        "stdin": subprocess.DEVNULL,
-        "env": os.environ.copy()
-    }
+
+    kwargs = {"stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL, "stdin": subprocess.DEVNULL, "env": os.environ.copy()}
     if sys.platform == "win32":
-        kwargs["creationflags"] = _no_window_flags() | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+        kwargs["creationflags"] = no_window_flags() | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+
     return subprocess.Popen(cmd, **kwargs)
 
 
@@ -184,6 +166,7 @@ def find_window_hwnd(pid: int) -> int | None:
     callback_ref = enum_proc(callback)
     _USER32.EnumWindows(callback_ref, 0)
     found = titled or others
+
     return found[0] if found else None
 
 
@@ -204,6 +187,7 @@ def parent_window(child_hwnd: int, parent_hwnd: int, width: int, height: int) ->
     _USER32.SetWindowLongPtrW(child_hwnd, gwl_style, style)
     _USER32.SetParent(child_hwnd, parent_hwnd)
     _USER32.SetWindowPos(child_hwnd, 0, 0, 0, max(width, 16), max(height, 16), swp_showwindow | swp_framechanged)
+
     return True
 
 
@@ -234,9 +218,3 @@ def stop_process(proc: subprocess.Popen | None):
         proc.wait(timeout=2)
     except Exception:
         proc.kill()
-
-
-def _no_window_flags() -> int:
-    if sys.platform != "win32":
-        return 0
-    return getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)

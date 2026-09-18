@@ -12,6 +12,7 @@ except ImportError:
     from PySide6 import QtCore
 
 from ..core.settings import Settings
+from .io_utils import no_window_flags
 
 
 class FrameCache:
@@ -107,9 +108,10 @@ class FrameGrabber(QtCore.QThread):
 
 
 def extract_jpeg(path: Path, seconds: float) -> bytes:
-    ffmpeg = Settings().get_ffmpeg()
+    ffmpeg = Settings().get_path(Settings.FFMPEG_KEY)
     if not ffmpeg or not ffmpeg.exists():
         return b""
+
     cmd = [
         str(ffmpeg),
         "-v", "error",
@@ -120,20 +122,19 @@ def extract_jpeg(path: Path, seconds: float) -> bytes:
         "-q:v", "3",
         "pipe:1"
     ]
-    kwargs = {
-        "stdout": subprocess.PIPE,
-        "stderr": subprocess.DEVNULL,
-        "stdin": subprocess.DEVNULL
-    }
+
+    kwargs = {"stdout": subprocess.PIPE, "stderr": subprocess.DEVNULL, "stdin": subprocess.DEVNULL}
     if sys.platform == "win32":
-        kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)
+        kwargs["creationflags"] = no_window_flags()
     result = subprocess.run(cmd, **kwargs)
+
     return result.stdout or b""
 
 
 def clip_at(clips: list[tuple[Path, float]], seconds: float) -> tuple[Path, float] | None:
     if not clips:
         return None
+
     remaining = max(0.0, seconds)
     last_index = len(clips) - 1
     for index, (path, duration) in enumerate(clips):
@@ -142,4 +143,5 @@ def clip_at(clips: list[tuple[Path, float]], seconds: float) -> tuple[Path, floa
             return path, max(0.0, local)
         remaining -= duration
     path, duration = clips[-1]
+
     return path, max(0.0, duration - 0.001)

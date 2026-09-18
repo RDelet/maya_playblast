@@ -37,34 +37,34 @@ class PlayblastDialog(FramelessWindow):
 
     WINDOW_TITLE = "Maya Playblast"
     MIN_WIDTH = 420
-    STYLE = FramelessWindow.STYLE + """
-        PlayblastDialog {{
+    STYLE = """
+        PlayblastDialog {
             background-color: #2b2b2b;
             border: 1px solid #606060;
             border-radius: 4px;
-        }}
-        PlayblastDialog QLabel#title_bar {{
+        }
+        PlayblastDialog QLabel#title_bar {
             color: #e0a020;
             font-size: 13px;
             font-weight: bold;
             padding: 6px 10px;
             border-bottom: 1px solid #444;
-        }}
-        PlayblastDialog QPushButton#playblast_button {{
+        }
+        PlayblastDialog QPushButton#playblast_button {
             border: 1px solid #555;
             border-radius: 3px;
             padding: 3px 8px;
             color: white;
             background-color: #801500;
-        }}
-        PlayblastDialog QPushButton#playblast_button:hover {{
+        }
+        PlayblastDialog QPushButton#playblast_button:hover {
             border-color: #e0a020;
             color: #e0a020;
-        }}
-        PlayblastDialog QPushButton#playblast_button:pressed {{
+        }
+        PlayblastDialog QPushButton#playblast_button:pressed {
             background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                         stop:0 #c94420, stop:1 #b03a18);
-        }}
+        }
     """
 
     def __init__(self, parent: Optional[QtWidgets.QWidget] = None):
@@ -72,10 +72,8 @@ class PlayblastDialog(FramelessWindow):
 
         self.setWindowTitle(self.WINDOW_TITLE)
         self.setMinimumWidth(self.MIN_WIDTH)
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool)
         self.set_header_title(self.WINDOW_TITLE)
 
-        self._drag_pos = None
         self._settings = Settings()
         self._syncing_container = False
         self._idle_job = None
@@ -83,7 +81,7 @@ class PlayblastDialog(FramelessWindow):
         self._watched_widget = None
 
         self._build_ui()
-        self.setStyleSheet(self.STYLE)
+        self.setStyleSheet(self.styleSheet() + self.STYLE)
         self._apply_startup_preset()
         self._refresh_library()
 
@@ -99,8 +97,8 @@ class PlayblastDialog(FramelessWindow):
         self._main_layout.addWidget(self._preset_bar)
 
         self._build_capture_group()
-        self._build_sequence_group()
         self._build_encoding_group()
+        self._build_sequence_group()
         self._build_viewport_group()
 
         self._main_layout.addWidget(Separator("", parent=self))
@@ -136,7 +134,7 @@ class PlayblastDialog(FramelessWindow):
         self._resolution = ResolutionWidget(self)
         self._capture_group.add_widget(self._resolution)
 
-        self._library_group = Group("Playblasts", expanded=True, parent=self)
+        self._library_group = Group("Output", expanded=True, parent=self)
         self._library_group.toggled.connect(self._resize_window)
         self._capture_group.add_widget(self._library_group)
 
@@ -154,9 +152,11 @@ class PlayblastDialog(FramelessWindow):
         self._sequence.shotSelected.connect(self._on_shot_selected)
         self._sequence.playingChanged.connect(self._resize_window)
         self._sequence_group.add_widget(self._sequence, 1)
+        self._sequence.set_active(self._sequence_group.expanded)
         self._set_sequence_stretch(self._sequence_group.expanded)
 
     def _on_sequence_toggled(self, expanded: bool):
+        self._sequence.set_active(expanded)
         self._set_sequence_stretch(expanded)
         self._resize_window()
 
@@ -218,9 +218,15 @@ class PlayblastDialog(FramelessWindow):
         self._refresh_library()
 
     def _refresh_library(self):
-        self._library.set_folder(self._output.shots_root)
-        self._sequence.set_clip_name(self._output.filename, self.extension)
-        self._sequence.set_root(self._output.shots_root)
+        library = getattr(self, "_library", None)
+        if library is None:
+            return
+        library.set_folder(self._output.shots_root)
+        sequence = getattr(self, "_sequence", None)
+        if sequence is None:
+            return
+        sequence.set_clip_name(self._output.filename, self.extension)
+        sequence.set_root(self._output.shots_root)
 
     def _on_shot_selected(self, name: str):
         part = name.replace("\\", "/").split("/")[0]
@@ -334,8 +340,7 @@ class PlayblastDialog(FramelessWindow):
 
         look.apply_look(self._look.state())
         capture = FrameCapture(capture_config, view_config)
-        player_path = self._settings.get_player()
-        if player_path:
+        if self._output.open_player and self._settings.get_path(Settings.PLAYER_KEY):
             capture.on_capture_complete.register(launchers.open_player)
         capture.on_capture_complete.register(self._on_capture_complete)
         capture.run()

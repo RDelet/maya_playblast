@@ -8,13 +8,17 @@ except ImportError:
     from PySide6 import QtCore, QtGui, QtWidgets
 
 from ..core.constants import VIDEO_SUFFIXES
+from ..io import io_utils
 from ..io.frames import FrameGrabber
 
 
+LANE_H = 20
 TRACK_H = 52
 RULER_H = 18
 CLOSE_SIZE = 14
+HANDLE = 6
 PLAYHEAD_COLOR = QtGui.QColor("#e0a020")
+ANN_COLOR = QtGui.QColor(224, 160, 32, 180)
 
 
 class _Clip:
@@ -24,6 +28,16 @@ class _Clip:
         self.path = path
         self.duration = max(float(duration), 0.001)
         self.pixmap: QtGui.QPixmap | None = None
+
+
+class _AnnBar:
+
+    def __init__(self, ann_id: int, clip: str, start: int, duration: int, color: str = "#e0a020"):
+        self.id = int(ann_id)
+        self.clip = str(clip)
+        self.start = max(0, int(start))
+        self.duration = max(1, int(duration))
+        self.color = str(color or "#e0a020")
 
 
 class TimelineWidget(QtWidgets.QWidget):
@@ -43,10 +57,15 @@ class TimelineWidget(QtWidgets.QWidget):
     shotSelected = QtCore.Signal(str)
     fileDropped = QtCore.Signal(str, int, str)
     clipRemoved = QtCore.Signal(int)
+    annotationChanged = QtCore.Signal(int, int, int)
+    annotationSelected = QtCore.Signal(int)
+    annotationMenu = QtCore.Signal(int)
 
     def __init__(self, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
         self._clips: list[_Clip] = []
+        self._anns: list[_AnnBar] = []
+        self._fps = 24.0
         self._total_ms = 0
         self._ms = 0
         self._press_pos = QtCore.QPoint()
@@ -60,10 +79,11 @@ class TimelineWidget(QtWidgets.QWidget):
         self._poster_paths = {}
         self._hover_close = -1
         self._drop = None
+        self._ann_drag = None
+        self._selected_id = -1
         self._grabber = FrameGrabber(self)
         self._grabber.frameReady.connect(self._on_poster)
-        self._grabber.start()
-        self.setFixedHeight(TRACK_H + RULER_H)
+        self.setFixedHeight(LANE_H + TRACK_H + RULER_H)
         self.setMouseTracking(True)
         self.setAcceptDrops(True)
         self.setStyleSheet(self.STYLE)
@@ -74,6 +94,28 @@ class TimelineWidget(QtWidgets.QWidget):
     def playlist(self) -> list[tuple[str, Path, float]]:
         return [(clip.name, clip.path, clip.duration) for clip in self._clips]
 
+    def set_fps(self, fps: float):
+        self._fps = max(float(fps), 1.0)
+        self.update()
+
+    def set_annotations(self, bars: list[tuple]):
+        selected = self._selected_id
+        self._anns = []
+        for item in bars:
+            color = item[4] if len(item) > 4 else "#e0a020"
+            self._anns.append(_AnnBar(item[0], item[1], item[2], item[3], color))
+        if not any(bar.id == selected for bar in self._anns):
+            self._selected_id = -1
+        self.update()
+
+    def selected_id(self) -> int:
+        return self._selected_id
+
+    def set_selected(self, ann_id: int):
+        self._selected_id = int(ann_id)
+        self.update()
+        self.annotationSelected.emit(self._selected_id)
+
     def set_clips(self, clips: list[tuple[str, Path, float]]):
         self._generation += 1
         self._grabber.cancel()
@@ -83,6 +125,7 @@ class TimelineWidget(QtWidgets.QWidget):
         self._dragging_clip = False
         self._scrubbing = False
         self._drop = None
+        self._ann_drag = None
         for index, clip in enumerate(self._clips):
             self._ask_poster(clip.path, urgent=index == 0)
         self.update()
@@ -117,10 +160,13 @@ class TimelineWidget(QtWidgets.QWidget):
         self._generation += 1
         self._grabber.cancel()
         self._clips = []
+        self._anns = []
         self._total_ms = 0
         self._ms = 0
         self._poster_paths = {}
         self._drop = None
+        self._ann_drag = None
+        self._selected_id = -1
         self.update()
 
     def set_position(self, ms: int):
@@ -133,7 +179,25 @@ class TimelineWidget(QtWidgets.QWidget):
         return super().event(event)
 
     def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.RightButton:
+            return
         if event.button() != QtCore.Qt.LeftButton:
+            return
+        if event.y() < LANE_H:
+            hit = self._ann_hit(event.pos())
+            if hit is not None:
+                bar, mode = hit
+                self._ann_drag = {
+                    "id": bar.id,
+                    "mode": mode,
+                    "start": bar.start,
+                    "duration": bar.duration,
+                    "x": event.x(),
+                    "clip": bar.clip
+                }
+                self.set_selected(bar.id)
+            else:
+                self.set_selected(-1)
             return
         close_index = self._close_index_at(event.pos())
         if close_index >= 0:
@@ -144,7 +208,7 @@ class TimelineWidget(QtWidgets.QWidget):
         self._drag_index = self._press_index
         self._dragging_clip = False
         self._order_before = self.playlist()
-        if event.y() >= TRACK_H:
+        if event.y() >= LANE_H + TRACK_H:
             self._scrubbing = True
             self.seekStarted.emit()
             self._seek_x(event.x())
@@ -156,14 +220,23 @@ class TimelineWidget(QtWidgets.QWidget):
         self._seek_x(event.x())
 
     def mouseMoveEvent(self, event):
-        hover = self._close_index_at(event.pos())
-        if hover != self._hover_close:
-            self._hover_close = hover
-            self.setCursor(QtCore.Qt.PointingHandCursor if hover >= 0 else QtCore.Qt.ArrowCursor)
-            self.update()
+        if self._ann_drag is None and not (event.buttons() & QtCore.Qt.LeftButton):
+            hover = self._close_index_at(event.pos())
+            if hover != self._hover_close:
+                self._hover_close = hover
+                self.update()
+            self._update_cursor(event.pos())
         if not (event.buttons() & QtCore.Qt.LeftButton):
             return
-        on_clips = self._press_pos.y() < TRACK_H
+        if self._ann_drag is not None:
+            mode = self._ann_drag["mode"]
+            if mode in ("left", "right"):
+                self.setCursor(QtCore.Qt.SizeHorCursor)
+            else:
+                self.setCursor(QtCore.Qt.ClosedHandCursor)
+            self._drag_annotation(event.x())
+            return
+        on_clips = LANE_H <= self._press_pos.y() < LANE_H + TRACK_H
         moved = abs(event.x() - self._press_pos.x())
         if on_clips and not self._dragging_clip and moved > 12 and self._press_index >= 0:
             self._dragging_clip = True
@@ -173,11 +246,19 @@ class TimelineWidget(QtWidgets.QWidget):
         if self._dragging_clip:
             self._move_clip(self._drag_index, self._index_at(event.x()))
             return
-        if self._scrubbing and self._press_pos.y() >= TRACK_H:
+        if self._scrubbing:
             self._seek_x(event.x())
 
     def mouseReleaseEvent(self, event):
         if event.button() != QtCore.Qt.LeftButton:
+            return
+        if self._ann_drag is not None:
+            drag = self._ann_drag
+            self._ann_drag = None
+            start = int(drag.get("live_start", drag["start"]))
+            duration = int(drag.get("live_duration", drag["duration"]))
+            if start != drag["start"] or duration != drag["duration"]:
+                self.annotationChanged.emit(drag["id"], start, duration)
             return
         if self._dragging_clip:
             self._dragging_clip = False
@@ -188,6 +269,16 @@ class TimelineWidget(QtWidgets.QWidget):
             self._seek_x(event.x())
             self.seekEnded.emit()
             self._scrubbing = False
+
+    def contextMenuEvent(self, event):
+        if event.y() >= LANE_H:
+            return
+        hit = self._ann_hit(event.pos())
+        if hit is None:
+            return
+        self.set_selected(hit[0].id)
+        self.annotationMenu.emit(hit[0].id)
+        event.accept()
 
     def leaveEvent(self, event):
         if self._hover_close != -1:
@@ -231,19 +322,21 @@ class TimelineWidget(QtWidgets.QWidget):
         painter.setRenderHint(QtGui.QPainter.Antialiasing, False)
         painter.fillRect(self.rect(), QtGui.QColor("#1a1a1a"))
         width = max(self.width(), 1)
+        painter.fillRect(0, 0, width, LANE_H, QtGui.QColor("#141414"))
+        self._draw_annotations(painter)
         x = 0
         play_index = self._index_at(self._x_from_ms(self._ms)) if self._clips else -1
         for index, clip in enumerate(self._clips):
             w = self._clip_width(clip, width)
-            rect = QtCore.QRect(x, 0, max(w, 1), TRACK_H)
+            rect = QtCore.QRect(x, LANE_H, max(w, 1), TRACK_H)
             painter.fillRect(rect, QtGui.QColor("#2c2c2c"))
             if clip.pixmap and not clip.pixmap.isNull():
                 scaled = clip.pixmap.scaledToHeight(TRACK_H, QtCore.Qt.SmoothTransformation)
-                thumb = QtCore.QRect(x, 0, min(rect.width(), scaled.width()), TRACK_H)
+                thumb = QtCore.QRect(x, LANE_H, min(rect.width(), scaled.width()), TRACK_H)
                 painter.drawPixmap(thumb, scaled, QtCore.QRect(0, 0, thumb.width(), TRACK_H))
             if self._drop and self._drop[1] == "replace" and self._drop[0] == index:
                 painter.fillRect(rect, QtGui.QColor(224, 160, 32, 70))
-            painter.fillRect(QtCore.QRect(x, TRACK_H - 16, rect.width(), 16), QtGui.QColor(0, 0, 0, 140))
+            painter.fillRect(QtCore.QRect(x, LANE_H + TRACK_H - 16, rect.width(), 16), QtGui.QColor(0, 0, 0, 140))
             painter.setPen(QtGui.QColor("#f0f0f0"))
             text = painter.fontMetrics().elidedText(clip.name, QtCore.Qt.ElideLeft, max(rect.width() - 8, 8))
             painter.drawText(
@@ -255,14 +348,15 @@ class TimelineWidget(QtWidgets.QWidget):
             painter.drawRect(rect.adjusted(0, 0, -1, -1))
             self._draw_close(painter, x, index)
             x += w
-        painter.fillRect(0, TRACK_H, width, RULER_H, QtGui.QColor("#121212"))
+        ruler_y = LANE_H + TRACK_H
+        painter.fillRect(0, ruler_y, width, RULER_H, QtGui.QColor("#121212"))
         painter.setPen(QtGui.QColor("#555"))
-        painter.drawLine(0, TRACK_H, width, TRACK_H)
+        painter.drawLine(0, ruler_y, width, ruler_y)
         self._draw_ticks(painter, width)
         if self._drop and self._drop[1] == "insert":
             ix = self._insert_x(self._drop[0], width)
             painter.setPen(QtGui.QPen(PLAYHEAD_COLOR, 3))
-            painter.drawLine(ix, 0, ix, TRACK_H)
+            painter.drawLine(ix, LANE_H, ix, LANE_H + TRACK_H)
         px = self._x_from_ms(self._ms)
         painter.setPen(QtGui.QPen(PLAYHEAD_COLOR, 2))
         painter.drawLine(px, 0, px, self.height())
@@ -274,6 +368,25 @@ class TimelineWidget(QtWidgets.QWidget):
         painter.setBrush(PLAYHEAD_COLOR)
         painter.setPen(QtCore.Qt.NoPen)
         painter.drawPolygon(head)
+
+    def _draw_annotations(self, painter: QtGui.QPainter):
+        for bar in self._anns:
+            rect = self._ann_rect(bar)
+            if rect is None:
+                continue
+            color = QtGui.QColor(bar.color)
+            if not color.isValid():
+                color = ANN_COLOR
+            else:
+                color.setAlpha(200)
+            selected = bar.id == self._selected_id
+            painter.setPen(QtCore.Qt.NoPen)
+            painter.setBrush(color)
+            painter.drawRect(rect)
+            border = QtGui.QColor("#fff") if selected else QtGui.QColor("#1a1a1a")
+            painter.setPen(QtGui.QPen(border, 2 if selected else 1))
+            painter.setBrush(QtCore.Qt.NoBrush)
+            painter.drawRect(rect.adjusted(0, 0, -1, -1))
 
     def _draw_close(self, painter: QtGui.QPainter, clip_x: int, index: int):
         rect = self._close_rect(clip_x)
@@ -294,9 +407,10 @@ class TimelineWidget(QtWidgets.QWidget):
         if self._total_ms > 30000:
             step = 5000
         ms = 0
+        ruler_y = LANE_H + TRACK_H
         while ms <= self._total_ms:
             x = self._x_from_ms(ms)
-            painter.drawLine(x, TRACK_H + 4, x, TRACK_H + RULER_H - 3)
+            painter.drawLine(x, ruler_y + 4, x, ruler_y + RULER_H - 3)
             ms += step
 
     def _refresh_total(self):
@@ -304,6 +418,10 @@ class TimelineWidget(QtWidgets.QWidget):
         self._ms = min(self._ms, max(self._total_ms, 0))
 
     def _ask_poster(self, path: Path, urgent: bool = False):
+        if not self._grabber.isRunning():
+            self._grabber = FrameGrabber(self)
+            self._grabber.frameReady.connect(self._on_poster)
+            self._grabber.start()
         self._poster_id += 1
         self._poster_paths[self._poster_id] = path
         self._grabber.ask(self._generation, self._poster_id, path, 0.0, urgent=urgent)
@@ -323,11 +441,104 @@ class TimelineWidget(QtWidgets.QWidget):
             x += self._clip_width(clip, width)
         return x
 
+    def _clip_index_for(self, key: str) -> int:
+        for index, clip in enumerate(self._clips):
+            if io_utils.match_clip(key, clip.name, clip.path):
+                return index
+        return -1
+
+    def _clip_frames(self, index: int) -> int:
+        clip = self._clips[index]
+        return max(1, int(round(clip.duration * self._fps)))
+
+    def _ann_rect(self, bar: _AnnBar) -> QtCore.QRect | None:
+        index = self._clip_index_for(bar.clip)
+        if index < 0:
+            return None
+        origin = self._clip_origin(index)
+        width = self._clip_width(self._clips[index])
+        frames = self._clip_frames(index)
+        x = origin + int(round(bar.start / float(frames) * width))
+        w = max(4, int(round(bar.duration / float(frames) * width)))
+        if x + w > origin + width:
+            w = max(4, origin + width - x)
+        return QtCore.QRect(x, 2, w, LANE_H - 4)
+
+    def _ann_hit(self, pos: QtCore.QPoint):
+        for bar in reversed(self._anns):
+            rect = self._ann_rect(bar)
+            if rect is None or not rect.contains(pos):
+                continue
+            if rect.width() > HANDLE * 2:
+                if pos.x() <= rect.left() + HANDLE:
+                    return bar, "left"
+                if pos.x() >= rect.right() - HANDLE:
+                    return bar, "right"
+            return bar, "move"
+        return None
+
+    def _drag_annotation(self, x: int):
+        drag = self._ann_drag
+        if not drag:
+            return
+        index = self._clip_index_for(drag["clip"])
+        if index < 0:
+            return
+        frames = self._clip_frames(index)
+        width = max(self._clip_width(self._clips[index]), 1)
+        delta = int(round((x - drag["x"]) / float(width) * frames))
+        start = drag["start"]
+        duration = drag["duration"]
+        end = start + duration
+        mode = drag["mode"]
+        if mode == "move":
+            start = start + delta
+        elif mode == "left":
+            start = start + delta
+            duration = end - start
+        else:
+            duration = duration + delta
+        duration = max(1, duration)
+        start = max(0, start)
+        if start + duration > frames:
+            if mode == "move":
+                start = max(0, frames - duration)
+            else:
+                duration = max(1, frames - start)
+                start = min(start, max(0, frames - duration))
+        bar = None
+        for item in self._anns:
+            if item.id == drag["id"]:
+                bar = item
+                break
+        if bar is None:
+            return
+        bar.start = start
+        bar.duration = duration
+        drag["live_start"] = start
+        drag["live_duration"] = duration
+        self.update()
+
+    def _update_cursor(self, pos: QtCore.QPoint):
+        if pos.y() < LANE_H:
+            hit = self._ann_hit(pos)
+            if hit is None:
+                self.setCursor(QtCore.Qt.ArrowCursor)
+                return
+            mode = hit[1]
+            if mode in ("left", "right"):
+                self.setCursor(QtCore.Qt.SizeHorCursor)
+            else:
+                self.setCursor(QtCore.Qt.OpenHandCursor)
+            return
+        hover = self._close_index_at(pos)
+        self.setCursor(QtCore.Qt.PointingHandCursor if hover >= 0 else QtCore.Qt.ArrowCursor)
+
     def _close_rect(self, clip_x: int) -> QtCore.QRect:
-        return QtCore.QRect(clip_x + 2, 2, CLOSE_SIZE, CLOSE_SIZE)
+        return QtCore.QRect(clip_x + 2, LANE_H + 2, CLOSE_SIZE, CLOSE_SIZE)
 
     def _close_index_at(self, pos: QtCore.QPoint) -> int:
-        if pos.y() >= TRACK_H or not self._clips:
+        if pos.y() < LANE_H or pos.y() >= LANE_H + TRACK_H or not self._clips:
             return -1
         index = self._index_at(pos.x())
         if index < 0:

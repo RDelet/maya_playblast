@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 import re
 import shutil
+import subprocess
+import sys
 
 
 _DEFAULT_PREFIX = "_v"
@@ -103,4 +105,43 @@ def latest_version(path: Path, fmt: VersionFormat | None = None) -> Path | None:
         return versions[-1][1]
     if path.exists():
         return path
+    return None
+
+
+def no_window_flags() -> int:
+    if sys.platform != "win32":
+        return 0
+    return getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)
+
+
+def relative_label(path: Path, root: Path | None, fallback: str | None = None) -> str:
+    if root:
+        try:
+            return path.resolve().relative_to(root.resolve()).as_posix()
+        except ValueError:
+            pass
+    if fallback is not None:
+        return fallback
+    return path.name
+
+
+def clip_key(value: str | Path) -> str:
+    return str(value).replace("\\", "/").lstrip("./")
+
+
+def same_clip(left: str | Path, right: str | Path) -> bool:
+    return clip_key(left) == clip_key(right)
+
+
+def match_clip(key: str, name: str, path: Path) -> bool:
+    wanted = clip_key(key)
+    label = clip_key(name)
+    posix = path.as_posix()
+    return wanted == label or posix.endswith("/" + wanted) or posix.endswith(wanted)
+
+
+def find_clip(key: str, clips: list) -> tuple | None:
+    for item in clips:
+        if match_clip(key, item[0], item[1]):
+            return item
     return None

@@ -46,6 +46,16 @@ class Separator(QtWidgets.QWidget):
             painter.drawText(QtCore.QRect(text_x, 0, text_width, rect.height()),
                              QtCore.Qt.AlignCenter, self._text)
             painter.drawLine(text_x + text_width + 4, mid_y, rect.width() - 4, mid_y)
+        elif self._orientation == QtCore.Qt.Vertical:
+            mid_x = rect.width() // 2
+            gradient = QtGui.QLinearGradient(0, 0, 0, rect.height())
+            gradient.setColorAt(0.0, QtGui.QColor(0, 0, 0, 0))
+            gradient.setColorAt(0.2, self._color)
+            gradient.setColorAt(0.8, self._color)
+            gradient.setColorAt(1.0, QtGui.QColor(0, 0, 0, 0))
+            pen = QtGui.QPen(QtGui.QBrush(gradient), 1)
+            painter.setPen(pen)
+            painter.drawLine(mid_x, 2, mid_x, rect.height() - 2)
         else:
             mid_y = rect.height() // 2
             gradient = QtGui.QLinearGradient(0, 0, rect.width(), 0)

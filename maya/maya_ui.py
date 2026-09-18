@@ -10,6 +10,10 @@ except ImportError:
 from maya import cmds, OpenMayaUI as omui
 
 
+_CAPTURE_WINDOW = "maya_playblast_capture"
+_CAPTURE_PANEL = "maya_playblast_view"
+
+
 def get_panels() -> list[str]:
     return cmds.getPanel(type="modelPanel")
 
@@ -65,10 +69,6 @@ def get_panel_widget(panel: str | None) -> QtWidgets.QWidget | None:
     if not ptr:
         return None
     return get_widget(ptr)
-
-
-_CAPTURE_WINDOW = "maya_playblast_capture"
-_CAPTURE_PANEL = "maya_playblast_view"
 
 
 def create_capture_panel(width: int, height: int, camera: str) -> tuple[str, str, str]:

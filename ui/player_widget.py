@@ -7,52 +7,14 @@ try:
 except ImportError:
     from PySide6 import QtCore, QtGui, QtWidgets
 
-from ..core.constants import CLOSE_ICON_PATH
 from ..core.logger import log
-from ..io import ffplay
-from ..io.frames import FrameCache, FrameGrabber, clip_at
-from .frameless_window import FramelessWindow
-from .icon_button import IconButton
+from ..io import ffplay, io_utils
+from ..io.sequence_doc import SequenceDoc
+from .annotate_overlay import AnnotateOverlay
+from .player_media import PlayerMedia
+from .player_window import PlayerWindow, VideoHost
+from .separator import Separator
 from .timeline_widget import TimelineWidget
-
-
-class _VideoHost(QtWidgets.QWidget):
-
-    resized = QtCore.Signal()
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        self.resized.emit()
-
-
-class PlayerWindow(FramelessWindow):
-
-    def __init__(self, player: "PlayerWidget"):
-        super().__init__(parent=player.window())
-        self._player = player
-        self.setWindowTitle("Sequence Player")
-        self.set_header_title("Sequence Player")
-        self.setMinimumSize(480, 320)
-        self.resize(640, 400)
-        self._main_layout.setAlignment(QtCore.Qt.Alignment())
-
-        attach = QtWidgets.QPushButton("Attach", self)
-        attach.setFlat(True)
-        attach.clicked.connect(player.attach)
-        self.add_header_widget(attach)
-
-        close_button = IconButton(CLOSE_ICON_PATH, size=30, icon_size=18, parent=self)
-        close_button.clicked.connect(player.attach)
-        self.add_header_widget(close_button)
-        self._main_layout.addWidget(player, 1)
-
-    def closeEvent(self, event):
-        player = self._player
-        self._player = None
-        if player is not None:
-            player.restore_in_host()
-        event.accept()
-        super().closeEvent(event)
 
 
 class PlayerWidget(QtWidgets.QWidget):
@@ -75,10 +37,32 @@ class PlayerWidget(QtWidgets.QWidget):
             border-color: #e0a020;
             color: #e0a020;
         }
-        PlayerWidget QLabel#time {
+        PlayerWidget QPushButton:checked {
+            border-color: #e0a020;
+            color: #e0a020;
+            background: #3a2a10;
+        }
+        PlayerWidget QPushButton#color {
+            min-width: 22px;
+            max-width: 22px;
+            padding: 0;
+        }
+        PlayerWidget QLabel#time,
+        PlayerWidget QLabel#tool {
             color: #888;
             font-size: 11px;
+        }
+        PlayerWidget QLabel#time {
             min-width: 80px;
+        }
+        PlayerWidget QSpinBox {
+            background: #1e1e1e;
+            border: 1px solid #555;
+            border-radius: 3px;
+            padding: 2px 4px;
+            color: #ccc;
+            min-width: 38px;
+            max-width: 48px;
         }
     """
 
@@ -90,44 +74,39 @@ class PlayerWidget(QtWidgets.QWidget):
     def __init__(self, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
 
-        self._concat_path: Path | None = None
         self._named: list[tuple[str, Path, float]] = []
-        self._clips: list[tuple[Path, float]] = []
-        self._proc = None
-        self._hwnd = None
-        self._total_ms = 0
-        self._base_ms = 0
-        self._fps = 24.0
-        self._paused = True
-        self._scrubbing = False
-        self._attach_tries = 0
-        self._proc_w = 0
-        self._proc_h = 0
-        self._wanted_frame = 0
-        self._generation = 0
-        self._still: QtGui.QPixmap | None = None
-        self._cache = FrameCache()
-        self._clock = QtCore.QElapsedTimer()
         self._window: PlayerWindow | None = None
         self._host: QtWidgets.QWidget | None = parent
         self._label_root: Path | None = None
+        self._doc: SequenceDoc | None = None
+        self._brush_color = QtGui.QColor("#e02020")
+        self._syncing_ann = False
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(4)
 
-        self._video = _VideoHost(self)
+        self._video = VideoHost(self)
         self._video.setObjectName("video")
         self._video.setAttribute(QtCore.Qt.WA_NativeWindow, True)
         self._video.setAttribute(QtCore.Qt.WA_DontCreateNativeAncestors, True)
         self._video.setMinimumHeight(160)
         self._video.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self._video.resized.connect(self._fit_video)
         layout.addWidget(self._video, 1)
 
         self._frame_view = QtWidgets.QLabel(self._video)
         self._frame_view.setAlignment(QtCore.Qt.AlignCenter)
         self._frame_view.setStyleSheet("background: #111;")
+        self._frame_view.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+
+        self._overlay = AnnotateOverlay(self._video)
+        self._overlay.strokeAdded.connect(self._on_stroke_added)
+        self._overlay.hide()
+
+        self._media = PlayerMedia(self._video, self._frame_view, self._overlay, self)
+        self._media.on_time = self._update_time
+        self._media.on_still_ui = self._on_still_ui
+        self._video.resized.connect(self._media.fit_video)
 
         self._timeline = TimelineWidget(self)
         self._timeline.seekStarted.connect(self._on_scrub_start)
@@ -137,6 +116,9 @@ class PlayerWidget(QtWidgets.QWidget):
         self._timeline.shotSelected.connect(self.shotSelected)
         self._timeline.fileDropped.connect(self._on_file_dropped)
         self._timeline.clipRemoved.connect(self._on_clip_removed)
+        self._timeline.annotationChanged.connect(self._on_annotation_changed)
+        self._timeline.annotationSelected.connect(self._on_annotation_selected)
+        self._timeline.annotationMenu.connect(self._on_annotation_menu)
         layout.addWidget(self._timeline)
 
         controls = QtWidgets.QHBoxLayout()
@@ -155,36 +137,79 @@ class PlayerWidget(QtWidgets.QWidget):
         controls.addWidget(self._play)
         controls.addWidget(self._pause)
         controls.addWidget(self._next)
+        controls.addWidget(Separator("", QtCore.Qt.Vertical, parent=self))
+
+        self._brush = QtWidgets.QPushButton("Brush", self)
+        self._brush.setCheckable(True)
+        self._brush.toggled.connect(self._on_brush_toggled)
+        controls.addWidget(self._brush)
+
+        size_label = QtWidgets.QLabel("Size", self)
+        size_label.setObjectName("tool")
+        controls.addWidget(size_label)
+        self._size = QtWidgets.QSpinBox(self)
+        self._size.setRange(1, 40)
+        self._size.setValue(12)
+        self._size.valueChanged.connect(self._apply_brush)
+        controls.addWidget(self._size)
+
+        opac_label = QtWidgets.QLabel("Opac", self)
+        opac_label.setObjectName("tool")
+        controls.addWidget(opac_label)
+        self._opacity = QtWidgets.QSpinBox(self)
+        self._opacity.setRange(1, 100)
+        self._opacity.setValue(85)
+        self._opacity.setSuffix("%")
+        self._opacity.valueChanged.connect(self._apply_brush)
+        controls.addWidget(self._opacity)
+
+        self._color_btn = QtWidgets.QPushButton(self)
+        self._color_btn.setObjectName("color")
+        self._color_btn.setFixedSize(22, 22)
+        self._color_btn.clicked.connect(self._pick_color)
+        controls.addWidget(self._color_btn)
+
+        dur_label = QtWidgets.QLabel("Dur", self)
+        dur_label.setObjectName("tool")
+        controls.addWidget(dur_label)
+        self._ann_duration = QtWidgets.QSpinBox(self)
+        self._ann_duration.setRange(1, 1)
+        self._ann_duration.setValue(1)
+        self._ann_duration.setEnabled(False)
+        self._ann_duration.valueChanged.connect(self._on_duration_edited)
+        controls.addWidget(self._ann_duration)
+
+        self._clear = QtWidgets.QPushButton("Clear", self)
+        self._clear.clicked.connect(self._clear_annotation)
+        controls.addWidget(self._clear)
 
         self._time = QtWidgets.QLabel("0:00 / 0:00", self)
         self._time.setObjectName("time")
         controls.addWidget(self._time)
         controls.addStretch()
+        controls.addWidget(Separator("", QtCore.Qt.Vertical, parent=self))
 
         self._detach = QtWidgets.QPushButton("Detach", self)
         self._detach.clicked.connect(self._on_dock_clicked)
         controls.addWidget(self._detach)
         layout.addLayout(controls)
 
-        self._poll = QtCore.QTimer(self)
-        self._poll.setInterval(50)
-        self._poll.timeout.connect(self._on_poll)
-
-        self._resize_timer = QtCore.QTimer(self)
-        self._resize_timer.setSingleShot(True)
-        self._resize_timer.setInterval(120)
-        self._resize_timer.timeout.connect(self._apply_video_size)
-
-        self._grabber = FrameGrabber(self)
-        self._grabber.frameReady.connect(self._on_frame_ready)
-        self._grabber.start()
         self.setStyleSheet(self.STYLE)
+        self._paint_color_button()
+        self._apply_brush()
 
     def set_host(self, host: QtWidgets.QWidget):
         self._host = host
 
     def set_label_root(self, root: Path | None):
         self._label_root = root
+
+    def set_doc(self, doc: SequenceDoc | None):
+        self._doc = doc
+        if self._named:
+            self._bind_notes()
+        else:
+            self._sync_annotations()
 
     def playlist(self) -> list[tuple[str, Path, float]]:
         return list(self._named)
@@ -195,114 +220,74 @@ class PlayerWidget(QtWidgets.QWidget):
     def load(self, clips: list[tuple[str, Path, float]]):
         if not clips:
             raise RuntimeError("No clips to play.")
-        self._generation += 1
-        self._grabber.cancel()
-        self._cache.clear()
-        if not self._grabber.isRunning():
-            self._grabber = FrameGrabber(self)
-            self._grabber.frameReady.connect(self._on_frame_ready)
-            self._grabber.start()
         self._named = [(name, path, duration) for name, path, duration in clips]
-        self._clips = [(path, duration) for name, path, duration in clips]
-        paths = [item[0] for item in self._clips]
-        self._total_ms = int(sum(item[1] for item in self._clips) * 1000)
-        self._fps = ffplay.probe_fps(paths[0])
-        self._concat_path = ffplay.write_concat_list(paths)
+        self._media.load([(path, duration) for name, path, duration in clips])
         self._timeline.set_clips(clips)
-        self._base_ms = 0
-        self._wanted_frame = 0
-        self._paused = True
-        self._still = None
+        self._timeline.set_fps(self._media.fps)
         self._update_time(0)
-        self.stop_playback()
+        self._bind_notes()
+        self._media.prefetch_cuts()
         if self.isVisible():
-            self._show_still_frame(0)
+            self._media.show_still_frame(0)
 
     def ordered_names(self) -> list[str]:
         return self._timeline.ordered_names()
 
     def loaded(self) -> bool:
-        return self._concat_path is not None and self._total_ms > 0
+        return self._media.loaded()
 
     def play(self):
-        if not self.loaded() or not self._paused:
+        if not self.loaded() or not self._media.paused:
             return
-        if self._base_ms >= self._total_ms:
-            self._base_ms = 0
-            self._wanted_frame = 0
-        self._paused = False
-        self._start_process(self._base_ms)
+        if self._media.base_ms >= self._media.total_ms:
+            self._media.base_ms = 0
+            self._media.wanted_frame = 0
+        self._media.paused = False
+        self._overlay.hide()
+        self._apply_brush()
+        self._media.prefetch_cuts()
+        self._media.start_process(self._media.base_ms)
 
     def pause(self):
-        if not self.loaded() or self._paused:
+        if not self.loaded() or self._media.paused:
             return
-        self._base_ms = self.position_ms()
-        self._paused = True
-        self._update_time(self._base_ms)
-        self.stop_playback()
-        self._show_still_frame(self._frame_index(self._base_ms))
+        self._media.base_ms = self._media.position_ms()
+        self._media.paused = True
+        self._update_time(self._media.base_ms)
+        self._media.stop_playback()
+        self._media.show_still_frame(self._media.frame_index(self._media.base_ms))
 
     def stop(self):
-        self._generation += 1
-        self._grabber.cancel()
-        self._cache.clear()
-        self.stop_playback()
-        self._concat_path = None
+        self._media.reset()
         self._named = []
-        self._clips = []
-        self._total_ms = 0
-        self._base_ms = 0
-        self._wanted_frame = 0
-        self._paused = True
-        self._still = None
-        self._frame_view.clear()
+        self._overlay.hide()
+        self._overlay.set_strokes([])
         self._timeline.clear()
         self._update_time(0)
+        self._apply_brush()
+        self._refresh_ann_editor()
 
     def event(self, event):
-        if event.type() == QtCore.QEvent.DeferredDelete and self._grabber.isRunning():
-            self._grabber.shutdown()
+        if event.type() == QtCore.QEvent.DeferredDelete:
+            self._media.shutdown()
         return super().event(event)
 
-    def stop_playback(self):
-        self._poll.stop()
-        self._resize_timer.stop()
-        ffplay.stop_process(self._proc)
-        self._proc = None
-        self._hwnd = None
-        self._attach_tries = 0
-
     def position_ms(self) -> int:
-        if self._paused or not self._alive():
-            return self._base_ms
-        return min(self._base_ms + self._clock.elapsed(), self._total_ms)
-
-    def seek(self, ms: int, paused: bool | None = None):
-        if not self.loaded():
-            return
-        self._base_ms = max(0, min(int(ms), self._total_ms))
-        if paused is None:
-            paused = self._paused
-        self._paused = paused
-        self._update_time(self._base_ms)
-        if paused:
-            self._show_still_frame(self._frame_index(self._base_ms))
-        else:
-            self._start_process(self._base_ms)
+        return self._media.position_ms()
 
     def next_frame(self):
         if not self.loaded():
             return
-        if not self._paused:
-            self._wanted_frame = self._frame_index(self.position_ms())
-        self._show_still_frame(self._wanted_frame + 1)
+        if not self._media.paused:
+            self._media.wanted_frame = self._media.frame_index(self._media.position_ms())
+        self._media.show_still_frame(self._media.wanted_frame + 1)
 
     def prev_frame(self):
         if not self.loaded():
             return
-        if not self._paused:
-            self._wanted_frame = self._frame_index(self.position_ms())
-        self._show_still_frame(self._wanted_frame - 1)
+        if not self._media.paused:
+            self._media.wanted_frame = self._media.frame_index(self._media.position_ms())
+        self._media.show_still_frame(self._media.wanted_frame - 1)
 
     def detach(self):
         if self._window is not None:
@@ -310,7 +295,7 @@ class PlayerWidget(QtWidgets.QWidget):
         self._window = PlayerWindow(self)
         self._detach.setText("Attach")
         self._window.show()
-        self._schedule_embed()
+        self._media.schedule_embed()
         self.detachedChanged.emit(True)
         self.layoutChanged.emit()
 
@@ -331,7 +316,7 @@ class PlayerWidget(QtWidgets.QWidget):
             self.setParent(self._host)
             self._host.layout().addWidget(self)
             self.show()
-        self._schedule_embed()
+        self._media.schedule_embed()
         if was_detached:
             self.detachedChanged.emit(False)
             self.layoutChanged.emit()
@@ -342,172 +327,9 @@ class PlayerWidget(QtWidgets.QWidget):
         else:
             self.detach()
 
-    def _frame_ms(self) -> float:
-        return 1000.0 / max(self._fps, 1.0)
-
-    def _frame_index(self, ms: int) -> int:
-        return int(round(ms / self._frame_ms()))
-
-    def _ms_from_frame(self, frame: int) -> int:
-        return int(round(frame * self._frame_ms()))
-
-    def _max_frame(self) -> int:
-        if self._total_ms <= 0:
-            return 0
-        return max(0, self._frame_index(max(self._total_ms - 1, 0)))
-
-    def _video_size(self) -> tuple[int, int]:
-        return max(self._video.width(), 16), max(self._video.height(), 16)
-
-    def _show_still_frame(self, frame: int):
-        if not self.loaded():
-            return
-        self._paused = True
-        if self._alive():
-            self.stop_playback()
-        frame = max(0, min(int(frame), self._max_frame()))
-        self._wanted_frame = frame
-        self._base_ms = min(self._ms_from_frame(frame), self._total_ms)
-        self._update_time(self._base_ms)
-        self._frame_view.show()
-        cached = self._cache.get(frame)
-        if cached:
-            self._set_jpeg(cached)
-            if not self._scrubbing:
-                self._prefetch(frame)
-            return
-        nearby = self._cache.nearest(frame)
-        if nearby:
-            self._set_jpeg(nearby)
-        target = clip_at(self._clips, self._base_ms / 1000.0)
-        if not target:
-            return
-        path, local = target
-        self._grabber.ask(self._generation, frame, path, local, urgent=True)
-
-    def _prefetch(self, frame: int):
-        for other in (frame - 1, frame + 1, frame - 2, frame + 2):
-            if other < 0 or other > self._max_frame() or self._cache.has(other):
-                continue
-            target = clip_at(self._clips, self._ms_from_frame(other) / 1000.0)
-            if not target:
-                continue
-            self._grabber.ask(self._generation, other, target[0], target[1], urgent=False)
-
-    def _on_frame_ready(self, generation: int, frame: int, data: bytes):
-        if generation != self._generation:
-            return
-        self._cache.put(frame, data)
-        if self._paused and frame == self._wanted_frame:
-            self._set_jpeg(data)
-            if not self._scrubbing:
-                self._prefetch(frame)
-
-    def _set_jpeg(self, data: bytes):
-        image = QtGui.QImage.fromData(data)
-        if image.isNull():
-            return
-        self._still = QtGui.QPixmap.fromImage(image)
-        self._frame_view.show()
-        self._paint_still()
-
-    def _paint_still(self):
-        if self._still is None or self._still.isNull():
-            return
-        size = self._video.size()
-        if size.width() < 2 or size.height() < 2:
-            return
-        self._frame_view.setGeometry(self._video.rect())
-        self._frame_view.setPixmap(self._still.scaled(
-            size,
-            QtCore.Qt.KeepAspectRatio,
-            QtCore.Qt.SmoothTransformation))
-
-    def _start_process(self, start_ms: int):
-        if not self._concat_path:
-            return
-        self.stop_playback()
-        self._video.winId()
-        width, height = self._video_size()
-        try:
-            self._proc = ffplay.start_ffplay(
-                self._concat_path,
-                width,
-                height,
-                start_ms / 1000.0)
-        except RuntimeError as exc:
-            log.error(str(exc))
-            return
-        self._proc_w = width
-        self._proc_h = height
-        if not self._paused:
-            self._clock.restart()
-        self._poll.start()
-
-    def _alive(self) -> bool:
-        return bool(self._proc) and self._proc.poll() is None
-
-    def _on_poll(self):
-        if not self._alive():
-            self._proc = None
-            self._hwnd = None
-            self._poll.stop()
-            if self._paused:
-                return
-            self._paused = True
-            self._base_ms = self._total_ms
-            self._update_time(self._total_ms)
-            self._show_still_frame(self._max_frame())
-            return
-        if not self._hwnd and self._attach_tries <= 50:
-            self._attach_tries += 1
-            hwnd = ffplay.find_window_hwnd(self._proc.pid)
-            parent = int(self._video.winId())
-            width, height = self._video_size()
-            if hwnd and hwnd != parent and ffplay.parent_window(hwnd, parent, width, height):
-                self._hwnd = hwnd
-                self._frame_view.hide()
-                self._fit_video()
-            elif self._attach_tries == 50:
-                log.warning("Could not embed ffplay in the player widget.")
-        if not self._scrubbing and not self._paused:
-            self._update_time(self.position_ms())
-
-    def _fit_video(self):
-        self._frame_view.setGeometry(self._video.rect())
-        if self._paused:
-            self._paint_still()
-            return
-        if self._hwnd:
-            width, height = self._video_size()
-            ffplay.move_window(self._hwnd, width, height)
-        self._resize_timer.start()
-
-    def _apply_video_size(self):
-        if not self.loaded() or self._paused or not self._alive():
-            self._paint_still()
-            return
-        width, height = self._video_size()
-        if abs(width - self._proc_w) < 2 and abs(height - self._proc_h) < 2:
-            if self._hwnd:
-                ffplay.move_window(self._hwnd, width, height)
-            return
-        self._base_ms = self.position_ms()
-        self._start_process(self._base_ms)
-
-    def _schedule_embed(self):
-        self._video.winId()
-        QtCore.QTimer.singleShot(0, self._reparent_video)
-        self._fit_video()
-
-    def _reparent_video(self):
-        self._video.winId()
-        if self._hwnd and self._alive():
-            width, height = self._video_size()
-            ffplay.parent_window(self._hwnd, int(self._video.winId()), width, height)
-            ffplay.move_window(self._hwnd, width, height)
-        elif self._paused:
-            self._paint_still()
+    def _on_still_ui(self):
+        self._apply_brush()
+        self._load_overlay_strokes()
 
     def _on_order_changed(self):
         self._named = self._timeline.playlist()
@@ -526,7 +348,7 @@ class PlayerWidget(QtWidgets.QWidget):
         if not duration:
             log.warning(f"Could not read duration: {path}")
             return
-        name = self._clip_name(path)
+        name = io_utils.relative_label(path, self._label_root)
         if mode == "replace" and 0 <= index < len(self._named):
             self._named[index] = (name, path, duration)
             self._timeline.replace_clip(index, name, path, duration)
@@ -553,57 +375,258 @@ class PlayerWidget(QtWidgets.QWidget):
         if not self._named:
             self.stop()
             return
-        self._clips = [(path, duration) for name, path, duration in self._named]
-        paths = [path for path, duration in self._clips]
-        self._total_ms = int(sum(duration for path, duration in self._clips) * 1000)
-        self._fps = ffplay.probe_fps(paths[0])
-        self._concat_path = ffplay.write_concat_list(paths)
-        self._cache.clear()
-        self._generation += 1
-        self._base_ms = min(self._base_ms, max(self._total_ms, 0))
-        if self._paused:
+        self._media.sync([(path, duration) for name, path, duration in self._named])
+        self._bind_notes()
+        self._media.prefetch_cuts()
+        if self._media.paused:
             if self.isVisible():
-                self._show_still_frame(self._frame_index(self._base_ms))
+                self._media.show_still_frame(self._media.frame_index(self._media.base_ms))
         else:
-            self._start_process(self._base_ms)
-        self._update_time(self._base_ms)
-
-    def _clip_name(self, path: Path) -> str:
-        if self._label_root:
-            try:
-                return path.resolve().relative_to(self._label_root.resolve()).as_posix()
-            except ValueError:
-                pass
-        return path.name
+            self._media.start_process(self._media.base_ms)
+        self._update_time(self._media.base_ms)
 
     def _on_scrub_start(self):
-        if not self._paused:
-            self._base_ms = self.position_ms()
-            self._wanted_frame = self._frame_index(self._base_ms)
-        self._paused = True
-        self.stop_playback()
-        self._scrubbing = True
+        if not self._media.paused:
+            self._media.base_ms = self._media.position_ms()
+            self._media.wanted_frame = self._media.frame_index(self._media.base_ms)
+        self._media.paused = True
+        self._media.stop_playback()
+        self._media.scrubbing = True
         self._frame_view.show()
+        self._overlay.show()
+        self._overlay.raise_()
+        self._apply_brush()
 
     def _on_scrub_moved(self, value: int):
-        if not self._scrubbing:
+        if not self._media.scrubbing:
             return
-        self._base_ms = value
+        self._media.base_ms = value
         self._update_time(value, move_slider=False)
-        self._show_still_frame(self._frame_index(value))
+        self._media.show_still_frame(self._media.frame_index(value))
 
     def _on_scrub_end(self):
-        self._scrubbing = False
+        self._media.scrubbing = False
         if not self.loaded():
             return
-        self._show_still_frame(self._frame_index(self._base_ms))
-        self._prefetch(self._wanted_frame)
+        self._media.show_still_frame(self._media.frame_index(self._media.base_ms))
+        self._media.prefetch(self._media.wanted_frame)
 
     def _update_time(self, ms: int, move_slider: bool = True):
-        ms = max(0, min(ms, self._total_ms))
-        if move_slider and not self._scrubbing:
+        ms = max(0, min(ms, self._media.total_ms))
+        if move_slider and not self._media.scrubbing:
             self._timeline.set_position(ms)
-        self._time.setText(self._format_ms(ms) + " / " + self._format_ms(self._total_ms))
+        self._time.setText(self._format_ms(ms) + " / " + self._format_ms(self._media.total_ms))
+
+    def _on_brush_toggled(self, checked: bool):
+        if checked and not self._media.paused:
+            self.pause()
+        self._apply_brush()
+
+    def _apply_brush(self):
+        enabled = self._brush.isChecked() and self._media.paused and self.loaded()
+        self._overlay.set_brush(
+            enabled,
+            self._brush_color,
+            self._opacity.value() / 100.0,
+            self._size.value() / 1000.0)
+        if enabled:
+            self._overlay.raise_()
+
+    def _paint_color_button(self):
+        color = self._brush_color
+        ann = self._selected_annotation()
+        if ann is not None:
+            picked = QtGui.QColor(ann.color)
+            if picked.isValid():
+                color = picked
+        self._color_btn.setStyleSheet(
+            "QPushButton#color { background: %s; border: 1px solid #888; }" % color.name())
+
+    def _pick_color(self):
+        ann = self._selected_annotation()
+        initial = self._brush_color
+        if ann is not None:
+            picked = QtGui.QColor(ann.color)
+            if picked.isValid():
+                initial = picked
+        color = QtWidgets.QColorDialog.getColor(initial, self.window(), "Color")
+        if not color.isValid():
+            return
+        if ann is not None:
+            self._doc.set_color(ann.id, color.name())
+            self._write_notes(ann.clip)
+            self._sync_annotations()
+            self._load_overlay_strokes()
+        else:
+            self._brush_color = color
+            self._apply_brush()
+        self._paint_color_button()
+
+    def _clear_annotation(self):
+        if not self._doc:
+            return
+        clip, _path, frame, _max_frames = self._current_clip_frame()
+        if not clip:
+            return
+        removed = self._doc.clear_at(clip, frame)
+        if removed is None:
+            return
+        self._write_notes(removed.clip)
+        self._timeline.set_selected(-1)
+        self._sync_annotations()
+
+    def _on_stroke_added(self, stroke: dict):
+        if not self._doc:
+            return
+        clip, _path, frame, _max_frames = self._current_clip_frame()
+        if not clip:
+            return
+        ann = self._doc.add_stroke(clip, frame, stroke)
+        self._write_notes(ann.clip)
+        self._sync_annotations()
+        self._timeline.set_selected(ann.id)
+
+    def _on_annotation_changed(self, ann_id: int, start: int, duration: int):
+        if not self._doc:
+            return
+        ann = self._doc.get(ann_id)
+        if ann is None:
+            return
+        max_frames = self._clip_max_frames(ann.clip)
+        self._doc.set_range(ann_id, start, duration, max_frames)
+        self._write_notes(ann.clip)
+        self._sync_annotations()
+        self._refresh_ann_editor()
+
+    def _on_annotation_selected(self, _ann_id: int):
+        self._refresh_ann_editor()
+
+    def _on_annotation_menu(self, ann_id: int):
+        if not self._doc:
+            return
+        ann = self._doc.get(ann_id)
+        if ann is None:
+            return
+        menu = QtWidgets.QMenu(self)
+        duration_action = menu.addAction("Duration")
+        color_action = menu.addAction("Color")
+        chosen = menu.exec_(QtGui.QCursor.pos())
+        if chosen is duration_action:
+            self._edit_duration(ann)
+        elif chosen is color_action:
+            self._timeline.set_selected(ann.id)
+            self._pick_color()
+
+    def _on_duration_edited(self, value: int):
+        if self._syncing_ann or not self._doc:
+            return
+        ann = self._selected_annotation()
+        if ann is None:
+            return
+        max_frames = self._clip_max_frames(ann.clip)
+        self._doc.set_range(ann.id, ann.start, int(value), max_frames)
+        self._write_notes(ann.clip)
+        self._sync_annotations()
+
+    def _edit_duration(self, ann):
+        max_frames = self._clip_max_frames(ann.clip)
+        value, ok = QtWidgets.QInputDialog.getInt(
+            self.window(),
+            "Annotation",
+            "Duration (frames)",
+            ann.duration,
+            1,
+            max_frames)
+        if not ok:
+            return
+        self._doc.set_range(ann.id, ann.start, int(value), max_frames)
+        self._write_notes(ann.clip)
+        self._sync_annotations()
+        self._timeline.set_selected(ann.id)
+
+    def _bind_notes(self):
+        if self._doc:
+            self._doc.bind_playlist([(name, path) for name, path, _duration in self._named])
+        self._timeline.set_fps(self._media.fps)
+        self._sync_annotations()
+
+    def _write_notes(self, clip_key: str):
+        if not self._doc:
+            return
+        path = self._clip_path(clip_key)
+        if path is None:
+            return
+        try:
+            self._doc.save_notes(clip_key, path)
+        except OSError as exc:
+            log.error(f"Could not save annotations: {exc}")
+
+    def _sync_annotations(self):
+        self._timeline.set_fps(self._media.fps)
+        if self._doc:
+            self._timeline.set_annotations(self._doc.bars())
+        else:
+            self._timeline.set_annotations([])
+        self._load_overlay_strokes()
+        self._refresh_ann_editor()
+
+    def _refresh_ann_editor(self):
+        self._syncing_ann = True
+        try:
+            ann = self._selected_annotation()
+            if ann is None:
+                self._ann_duration.setEnabled(False)
+                self._ann_duration.setRange(1, 1)
+                self._ann_duration.setValue(1)
+            else:
+                max_frames = self._clip_max_frames(ann.clip)
+                self._ann_duration.setRange(1, max_frames)
+                self._ann_duration.setValue(ann.duration)
+                self._ann_duration.setEnabled(True)
+            self._paint_color_button()
+        finally:
+            self._syncing_ann = False
+
+    def _selected_annotation(self):
+        if not self._doc:
+            return None
+        return self._doc.get(self._timeline.selected_id())
+
+    def _load_overlay_strokes(self):
+        if not self._doc or not self._media.paused:
+            self._overlay.set_strokes([])
+            return
+        clip, _path, frame, _max_frames = self._current_clip_frame()
+        if not clip:
+            self._overlay.set_strokes([])
+            return
+        self._overlay.set_strokes(self._doc.strokes_at(clip, frame))
+
+    def _current_clip_frame(self) -> tuple[str | None, Path | None, int, int]:
+        if not self._named:
+            return None, None, 0, 0
+        remaining = max(0.0, self._media.base_ms / 1000.0)
+        last = len(self._named) - 1
+        for index, (name, path, duration) in enumerate(self._named):
+            if remaining <= duration or index == last:
+                local = min(remaining, max(duration - 0.001, 0.0))
+                max_frames = max(1, int(round(duration * self._media.fps)))
+                frame = max(0, min(int(round(local * self._media.fps)), max_frames - 1))
+                return name, path, frame, max_frames
+            remaining -= duration
+        name, path, duration = self._named[-1]
+        max_frames = max(1, int(round(duration * self._media.fps)))
+        return name, path, max(0, max_frames - 1), max_frames
+
+    def _clip_path(self, key: str) -> Path | None:
+        found = io_utils.find_clip(key, self._named)
+        return None if found is None else found[1]
+
+    def _clip_max_frames(self, key: str) -> int:
+        found = io_utils.find_clip(key, self._named)
+        if found is None:
+            return 1
+        return max(1, int(round(found[2] * self._media.fps)))
 
     def _format_ms(self, value: int) -> str:
         seconds = max(0, int(value / 1000))
@@ -611,14 +634,14 @@ class PlayerWidget(QtWidgets.QWidget):
 
     def showEvent(self, event):
         super().showEvent(event)
-        if self.loaded() and self._paused:
-            self._show_still_frame(self._wanted_frame)
-        elif self.loaded() and not self._alive():
-            self._start_process(self._base_ms)
+        if self.loaded() and self._media.paused:
+            self._media.show_still_frame(self._media.wanted_frame)
+        elif self.loaded() and not self._media.alive():
+            self._media.start_process(self._media.base_ms)
         else:
-            self._schedule_embed()
-        QtCore.QTimer.singleShot(0, self._fit_video)
+            self._media.schedule_embed()
+        QtCore.QTimer.singleShot(0, self._media.fit_video)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self._fit_video()
+        self._media.fit_video()

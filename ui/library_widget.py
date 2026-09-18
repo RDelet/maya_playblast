@@ -12,9 +12,6 @@ from ..io import launchers
 from ..core.logger import log
 
 
-SKIP_DIRS = {".git", "__pycache__", ".mayaSwatches", ".svn"}
-
-
 class _LibraryTree(QtWidgets.QTreeWidget):
 
     def mimeTypes(self):
@@ -97,7 +94,7 @@ class LibraryWidget(QtWidgets.QWidget):
             return
         entries.sort(key=lambda path: (not path.is_dir(), path.name.lower()))
         for path in entries:
-            if path.name.startswith(".") or path.name in SKIP_DIRS:
+            if path.name.startswith("."):
                 continue
             if path.is_dir():
                 item = QtWidgets.QTreeWidgetItem([path.name])

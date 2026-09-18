@@ -130,9 +130,6 @@ class Group(QtWidgets.QWidget):
     def expanded(self) -> bool:
         return self._expanded
 
-    def add_layout(self, layout: QtWidgets.QLayout):
-        self._widget.layout().addLayout(layout)
-    
     def restore_settings(self):
         value = self._settings.get(self._key_settings)
         if value:

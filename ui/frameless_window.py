@@ -35,7 +35,7 @@ class FramelessWindow(QtWidgets.QDialog):
         self._drag_pos = None
         self._resize_direction = None
 
-        self.setStyleSheet(self.STYLE.format(background=background, border=border))
+        self.setStyleSheet(FramelessWindow.STYLE.format(background=background, border=border))
 
         self._main_layout = QtWidgets.QVBoxLayout(self)
         self._main_layout.setContentsMargins(5, 5, 5, 5)

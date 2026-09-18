@@ -12,6 +12,7 @@ from ..core.constants import VIDEO_SUFFIXES
 from ..core.logger import log
 from ..core.settings import Settings
 from ..io import ffplay, io_utils
+from ..io.sequence_doc import DOC_NAME, SequenceDoc
 from .player_widget import PlayerWidget
 
 
@@ -42,6 +43,9 @@ class SequenceWidget(QtWidgets.QWidget):
         self._stem = "playblast"
         self._suffix = ".mp4"
         self._clip_key = None
+        self._doc = SequenceDoc()
+        self._from_doc = False
+        self._active = False
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -74,35 +78,65 @@ class SequenceWidget(QtWidgets.QWidget):
     def set_root(self, folder: Path | None):
         self._root = folder
         self._player.set_label_root(folder)
-        self.refresh()
+        self._doc = SequenceDoc()
+        self._from_doc = False
+        if folder:
+            path = folder / DOC_NAME
+            self._from_doc = self._doc.load(path)
+            self._doc.set_path(path)
+        self._player.set_doc(self._doc)
+        if self._active:
+            self.refresh()
+
+    def set_active(self, active: bool):
+        if not active:
+            self._active = False
+            self.stop()
+            return
+        if self._active:
+            return
+        self._active = True
+        if self._root is not None:
+            self.refresh()
 
     def set_clip_name(self, stem: str, extension: str):
         self._stem = stem
         self._suffix = "." + extension.lstrip(".")
 
     def ordered_names(self) -> list[str]:
-        return self._player.ordered_names()
+        names = self._player.ordered_names()
+        if names:
+            return names
+        return list(self._doc.clips)
 
     def clip_paths(self) -> list[str]:
-        paths = []
-        for name, path, duration in self._player.playlist():
-            paths.append(self._store_path(path))
-        return paths
+        playlist = self._player.playlist()
+        if playlist:
+            return [self._store_path(path) for name, path, duration in playlist]
+        return list(self._doc.clips)
 
     def set_order(self, names: list[str]):
         clips = []
         for name in names:
             path = self._shot_video(str(name))
             if path:
-                clips.append(path)
-        self._settings.set("ui/sequence/clips", json.dumps([self._store_path(path) for path in clips]))
-        self.refresh()
+                clips.append(self._store_path(path))
+        self._doc.clips = clips
+        self._from_doc = True
+        self._save_doc()
+        if self._active:
+            self.refresh()
 
     def set_clip_paths(self, paths: list[str]):
-        self._settings.set("ui/sequence/clips", json.dumps([str(path) for path in paths]))
-        self.refresh()
+        self._doc.clips = [str(path) for path in paths]
+        self._from_doc = True
+        self._save_doc()
+        if self._active:
+            self.refresh()
 
     def refresh(self):
+        if not self._active:
+            return
         stored = self._stored_clips()
         if stored is None:
             paths = []
@@ -128,6 +162,13 @@ class SequenceWidget(QtWidgets.QWidget):
         return names
 
     def _stored_clips(self) -> list[Path] | None:
+        if self._from_doc:
+            paths = []
+            for item in self._doc.clips:
+                path = self._resolve_path(str(item))
+                if path:
+                    paths.append(path)
+            return paths
         raw = self._settings.get("ui/sequence/clips")
         if raw is None:
             return None
@@ -145,12 +186,7 @@ class SequenceWidget(QtWidgets.QWidget):
         return paths
 
     def _store_path(self, path: Path) -> str:
-        if self._root:
-            try:
-                return path.resolve().relative_to(self._root.resolve()).as_posix()
-            except ValueError:
-                pass
-        return str(path)
+        return io_utils.relative_label(path, self._root, fallback=str(path))
 
     def _resolve_path(self, text: str) -> Path | None:
         path = Path(text)
@@ -159,7 +195,18 @@ class SequenceWidget(QtWidgets.QWidget):
         return path if path.exists() else None
 
     def _save_playlist(self):
-        self._settings.set("ui/sequence/clips", json.dumps(self.clip_paths()))
+        self._doc.clips = self.clip_paths()
+        self._save_doc()
+
+    def _save_doc(self):
+        if self._root:
+            self._doc.set_path(self._root / DOC_NAME)
+            try:
+                self._doc.save()
+                self._from_doc = True
+            except OSError as exc:
+                log.error(f"Could not save sequence: {exc}")
+        self._settings.set("ui/sequence/clips", json.dumps(self._doc.clips))
 
     def _on_playlist_changed(self, names: list):
         self._save_playlist()
@@ -193,7 +240,7 @@ class SequenceWidget(QtWidgets.QWidget):
             duration = durations.get(path)
             if not duration:
                 continue
-            clips.append((self._clip_label(path), path, duration))
+            clips.append((io_utils.relative_label(path, self._root), path, duration))
         if not clips:
             self._clip_key = key
             self._player.stop()
@@ -201,18 +248,10 @@ class SequenceWidget(QtWidgets.QWidget):
         try:
             self._player.load(clips)
             self._clip_key = key
-            if self._settings.get("ui/sequence/clips") is None:
+            if not self._from_doc:
                 self._save_playlist()
         except RuntimeError as exc:
             log.error(str(exc))
-
-    def _clip_label(self, path: Path) -> str:
-        if self._root:
-            try:
-                return path.resolve().relative_to(self._root.resolve()).as_posix()
-            except ValueError:
-                pass
-        return path.name
 
     def _shot_video(self, name: str) -> Path | None:
         if not self._root:

@@ -15,7 +15,7 @@ def open_player(path: str | Path):
         raise RuntimeError(f"Path {path} does not exists !")
 
     settings = Settings()
-    player_path = settings.get_player()
+    player_path = settings.get_path(Settings.PLAYER_KEY)
     if not player_path:
         raise RuntimeError("Player path is not set. Please set it in the settings.")
     if not player_path.exists():
@@ -40,7 +40,7 @@ def reveal_in_explorer(path: str | Path):
 
 def ffmpeg_capture(config: CaptureConfig, view_cfg: ViewConfig):
     settings = Settings()
-    ffmpeg_path = settings.get_ffmpeg()
+    ffmpeg_path = settings.get_path(Settings.FFMPEG_KEY)
     if not ffmpeg_path:
         raise RuntimeError("FFmpeg path is not set. Please set it in the settings.")
     if not ffmpeg_path.exists():

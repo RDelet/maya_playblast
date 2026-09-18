@@ -11,6 +11,7 @@ from ..core.settings import Settings
 from ..io import io_utils
 from ..maya import maya_utils
 from .labeled_edit import LabeledLineEdit
+from .toggle_switch import ToggleSwitch
 
 
 class OutputWidget(QtWidgets.QWidget):
@@ -22,6 +23,7 @@ class OutputWidget(QtWidgets.QWidget):
     MODE_KEY = "ui/workspace/mode"
     PATH_KEY = "ui/workspace/path"
     WRITE_KEY = "ui/output/write_mode"
+    OPEN_PLAYER_KEY = "ui/capture/open_player"
 
     STYLE = """
         OutputWidget QLabel#resolved {
@@ -168,9 +170,14 @@ class OutputWidget(QtWidgets.QWidget):
         output_row.addWidget(self._resolved, 1)
         layout.addLayout(output_row)
 
+        self._open_player = ToggleSwitch("Open player", default=True, parent=self)
+        self._open_player.toggled.connect(self._on_open_player_changed)
+        layout.addWidget(self._open_player)
+
         self.setStyleSheet(self.STYLE)
         self._restore_workspace()
         self._restore_write_mode()
+        self._restore_open_player()
         self._shot.textChanged.connect(self._on_changed)
         self._filename.textChanged.connect(self._on_changed)
         self._mode.currentIndexChanged.connect(self._on_mode_changed)
@@ -230,6 +237,10 @@ class OutputWidget(QtWidgets.QWidget):
         return self.write_mode == self.MODE_ERASE
 
     @property
+    def open_player(self) -> bool:
+        return self._open_player.isChecked()
+
+    @property
     def shot(self) -> str:
         return self._shot.text
 
@@ -280,7 +291,8 @@ class OutputWidget(QtWidgets.QWidget):
     def _maya_subfolder(self) -> str:
         if not self.use_maya_workspace:
             return ""
-        return self._settings.get_maya_folder()
+        value = str(self._settings.get(Settings.MAYA_FOLDER_KEY) or "").strip()
+        return value or Settings.DEFAULT_MAYA_FOLDER
 
     def _restore_workspace(self):
         mode = self._settings.get(self.MODE_KEY)
@@ -296,6 +308,15 @@ class OutputWidget(QtWidgets.QWidget):
         value = self._settings.get(self.WRITE_KEY)
         if value:
             self.write_mode = str(value)
+
+    def _restore_open_player(self):
+        value = self._settings.get(self.OPEN_PLAYER_KEY)
+        if value is None:
+            return
+        self._open_player.setChecked(str(value).lower() in ("1", "true", "yes"))
+
+    def _on_open_player_changed(self, checked: bool):
+        self._settings.set(self.OPEN_PLAYER_KEY, checked)
 
     def _apply_workspace_mode(self):
         maya_mode = self.use_maya_workspace

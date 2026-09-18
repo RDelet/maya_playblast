@@ -39,11 +39,12 @@ class ComboBox(QtWidgets.QWidget):
     """
 
     def __init__(self, name: str, items: list[ComboBoxItem], label_size: int = 80,
-                 parent: QtWidgets.QWidget | None = None):
+                 persist: bool = True, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
 
         self._name = name
         self._settings = Settings()
+        self._persist = persist
 
         self._layout = QtWidgets.QHBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
@@ -61,8 +62,9 @@ class ComboBox(QtWidgets.QWidget):
         self._layout.addWidget(self._combobox)
 
         self._combobox.setStyleSheet(self.STYLE)
-        self.restore_settings()
-        self._combobox.currentIndexChanged.connect(self.save_settings)
+        if self._persist:
+            self.restore_settings()
+            self._combobox.currentIndexChanged.connect(self.save_settings)
     
     def add_callback(self, callback: callable):
         self._combobox.currentIndexChanged.connect(callback)
